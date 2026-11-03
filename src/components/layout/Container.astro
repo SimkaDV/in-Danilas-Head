@@ -1,0 +1,13 @@
+---
+const { class: className } = Astro.props;
+---
+<div class:list={['container', className]}><slot /></div>
+
+<style>
+  .container {
+    width: 100%;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+</style>

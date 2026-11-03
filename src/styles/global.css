@@ -1,0 +1,21 @@
+@import './tokens.css';
+
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-main);
+  font-weight: var(--fw-regular);
+  line-height: 1.5;
+}
+
+main { flex: 1; }
+
+img, svg, video { display: block; max-width: 100%; }

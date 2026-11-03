@@ -1,0 +1,11 @@
+---
+import Container from './Container.astro';
+const { id, class: className } = Astro.props;
+---
+<section id={id} class:list={['section', className]}>
+  <Container><slot /></Container>
+</section>
+
+<style>
+  .section { padding-block: var(--section-gap); }
+</style>

@@ -1,0 +1,19 @@
+:root {
+  --color-bg: #8EAE69;
+  --color-deep: #4A6938;
+  --color-dark: #292D25;
+  --color-accent: #D4FB0B;
+  --color-text: #292D25;
+  --color-text-inverse: #ffffff;
+
+  --font-main: 'Rubik Variable', system-ui, sans-serif;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-black: 800;
+
+  --container: 1200px;
+  --gutter: clamp(16px, 4vw, 40px);
+  --section-gap: clamp(48px, 8vw, 96px);
+}
