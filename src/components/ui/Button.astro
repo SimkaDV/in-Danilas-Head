@@ -1,0 +1,42 @@
+---
+interface Props {
+  href: string;
+}
+
+const { href } = Astro.props;
+---
+<a class="button" href={href}><slot /></a>
+
+<style>
+  .button {
+    --button-padding-block: 20px;
+    --button-padding-inline: 25px;
+    --button-focus-width: 2px;
+    --button-focus-offset: 3px;
+    --button-line-height: 1.2;
+
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    padding: var(--button-padding-block) var(--button-padding-inline);
+    border-radius: var(--radius-pill);
+    background: var(--color-button);
+    color: var(--color-black);
+    font-family: var(--font-main);
+    font-size: var(--fs-button);
+    font-weight: var(--fw-semibold);
+    line-height: var(--button-line-height);
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .button:hover {
+    background: var(--color-accent);
+  }
+
+  .button:focus-visible {
+    outline: var(--button-focus-width) solid var(--color-black);
+    outline-offset: var(--button-focus-offset);
+  }
+</style>

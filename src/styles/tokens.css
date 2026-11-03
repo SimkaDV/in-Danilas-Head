@@ -6,6 +6,18 @@
   --color-text: #292D25;
   --color-text-inverse: #ffffff;
 
+  /* hero, временно */
+  --color-black: #000000;
+  --color-button: #BADB0A;
+  --color-hero-glass: rgba(7, 38, 7, 0.51);
+  --radius-panel: 45px;
+  --radius-pill: 40px;
+  --stroke-panel: 2px;
+  --shadow-panel-inset: inset 13px 13px 4px 0 var(--color-black);
+  --fs-h1: clamp(32px, 5.4vw, 64px);
+  --lh-h1: 1.12;
+  --fs-button: clamp(16px, 1.6vw, 20px);
+
   --font-main: 'Rubik Variable', system-ui, sans-serif;
   --fw-regular: 400;
   --fw-medium: 500;

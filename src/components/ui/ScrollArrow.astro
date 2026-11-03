@@ -1,0 +1,40 @@
+---
+interface Props {
+  href: string;
+}
+
+const { href } = Astro.props;
+---
+<a class="scroll-arrow" href={href} aria-label="Листать дальше">
+  <svg viewBox="0 0 82 47" aria-hidden="true">
+    <path d="M2 2 41 44 80 2" />
+  </svg>
+</a>
+
+<style>
+  .scroll-arrow {
+    --arrow-width: clamp(48px, 8vw, 82px);
+    --arrow-stroke-width: 3px;
+    --arrow-focus-width: 2px;
+    --arrow-focus-offset: 3px;
+
+    display: block;
+    width: var(--arrow-width);
+    color: var(--color-black);
+  }
+
+  .scroll-arrow svg {
+    width: 100%;
+    height: auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: var(--arrow-stroke-width);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .scroll-arrow:focus-visible {
+    outline: var(--arrow-focus-width) solid var(--color-black);
+    outline-offset: var(--arrow-focus-offset);
+  }
+</style>

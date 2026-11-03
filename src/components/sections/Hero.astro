@@ -1,0 +1,142 @@
+---
+import { Image } from 'astro:assets';
+import headBottom from '@/assets/head-bottom.png';
+import headTop from '@/assets/head-top.png';
+import Button from '@/components/ui/Button.astro';
+import ScrollArrow from '@/components/ui/ScrollArrow.astro';
+import { heroLinks, heroNextHref, heroTitle } from '@/data/hero';
+---
+<section class="hero" id="hero">
+  <div class="hero__panel">
+    <h1 class="hero__title">{heroTitle}</h1>
+    <div class="hero__stage">
+      <!-- сюда позже строка «что это за место» -->
+      <div class="hero__head" role="img" aria-label="Голова Даньки">
+        <Image src={headTop} alt="" loading="eager" />
+        <Image src={headBottom} alt="" loading="eager" />
+      </div>
+      <nav class="hero__links" aria-label="Быстрый переход">
+        {heroLinks.map((link) => <Button href={link.href}>{link.label}</Button>)}
+      </nav>
+    </div>
+  </div>
+  <ScrollArrow href={heroNextHref} />
+</section>
+
+<style>
+  .hero {
+    --hero-side-space: clamp(8px, 3.5vw, 50px);
+    --hero-top-space: clamp(24px, 2.2vw, 32px);
+    --hero-title-gap: clamp(24px, 3vw, 40px);
+    --hero-stage-gap: clamp(12px, 1.2vw, 16px);
+    --hero-link-offset: clamp(16px, 6vw, 75px);
+    --hero-arrow-gap: 24px;
+    --hero-glass-blur: 1px;
+    --hero-title-shadow: 3px 3px 0 var(--color-black);
+    --head-seam-overlap: -1px;
+
+    padding-inline: var(--gutter);
+  }
+
+  .hero__panel {
+    overflow: visible;
+    padding: var(--hero-top-space) var(--hero-side-space) 0;
+    border: var(--stroke-panel) solid var(--color-black);
+    border-radius: var(--radius-panel);
+    background: var(--color-hero-glass);
+    backdrop-filter: blur(var(--hero-glass-blur));
+    box-shadow: var(--shadow-panel-inset);
+  }
+
+  .hero__title {
+    color: var(--color-accent);
+    font-size: var(--fs-h1);
+    font-weight: var(--fw-black);
+    line-height: var(--lh-h1);
+    text-align: center;
+    text-shadow: var(--hero-title-shadow);
+    text-wrap: balance;
+  }
+
+  .hero__stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    margin-top: var(--hero-title-gap);
+  }
+
+  .hero__head {
+    --head-overhang: 19px;
+
+    position: relative;
+    z-index: 1;
+    grid-column: 2;
+    width: clamp(180px, 30vw, 347px);
+    margin-bottom: calc(var(--head-overhang) * -1);
+    justify-self: center;
+  }
+
+  .hero__head img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .hero__head img + img {
+    margin-top: var(--head-seam-overlap);
+  }
+
+  .hero__links {
+    display: flex;
+    grid-column: 3;
+    flex-direction: column;
+    align-self: center;
+    gap: var(--hero-stage-gap);
+    margin-inline-start: var(--hero-link-offset);
+  }
+
+  .hero__links :global(a) {
+    white-space: nowrap;
+  }
+
+  .hero > :global(.scroll-arrow) {
+    margin: var(--hero-arrow-gap) auto 0;
+  }
+
+  @media (min-width: 721px) and (max-width: 900px) {
+    .hero {
+      padding-inline: 0;
+    }
+
+    .hero__panel {
+      --hero-side-space: 8px;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .hero {
+      --hero-side-space: clamp(12px, 5vw, 20px);
+    }
+
+    .hero__stage {
+      grid-template-columns: minmax(0, 1fr);
+      justify-items: center;
+      gap: var(--hero-stage-gap);
+    }
+
+    .hero__head {
+      grid-column: 1;
+    }
+
+    .hero__links {
+      grid-column: 1;
+      width: min(100%, 320px);
+      align-items: stretch;
+      margin-inline-start: 0;
+    }
+
+    .hero__links :global(a) {
+      white-space: normal;
+    }
+  }
+</style>
