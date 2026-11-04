@@ -2,7 +2,7 @@
 
 Личный сайт Даньки на Astro + React (React только для интерактивных «островов»).
 
-Заметки, палитра, правила и статус по roadmap: [docs/NOTES.md](docs/NOTES.md).
+Заметки, палитра и правила: [docs/NOTES.md](docs/NOTES.md). План и статусы: [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Команды
 
