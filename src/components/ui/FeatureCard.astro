@@ -1,0 +1,53 @@
+---
+interface Props {
+  title: string;
+  text: string;
+  shape?: 'a' | 'b' | 'c';
+}
+
+const { title, text, shape = 'a' } = Astro.props;
+---
+<article class:list={['feature-card', `feature-card--${shape}`]}>
+  <h4 class="feature-card__title">{title}</h4>
+  <p class="feature-card__text">{text}</p>
+</article>
+
+<style>
+  .feature-card {
+    --card-padding: clamp(18px, 2vw, 28px);
+    --card-gap: clamp(12px, 1.4vw, 20px);
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--card-gap);
+    padding: var(--card-padding);
+    background: var(--color-deep);
+    color: var(--color-text-inverse);
+  }
+
+  /* у каждой карточки свой «вырезанный» угол */
+  .feature-card--a {
+    border-radius: var(--radius-card-sm) var(--radius-card-lg) var(--radius-card-sm) var(--radius-card-lg);
+  }
+
+  .feature-card--b {
+    border-radius: var(--radius-card-lg) var(--radius-card-sm) var(--radius-card-lg) var(--radius-card-sm);
+    text-align: end;
+  }
+
+  .feature-card--c {
+    border-radius: var(--radius-card-lg) var(--radius-card-sm) var(--radius-card-sm) var(--radius-card-lg);
+  }
+
+  .feature-card__title {
+    font-size: var(--fs-card-title);
+    font-weight: var(--fw-bold);
+    line-height: 1.15;
+  }
+
+  .feature-card__text {
+    font-size: var(--fs-card-text);
+    font-weight: var(--fw-medium);
+    line-height: 1.35;
+  }
+</style>

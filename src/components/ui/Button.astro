@@ -1,11 +1,19 @@
 ---
 interface Props {
   href: string;
+  arrow?: boolean;
 }
 
-const { href } = Astro.props;
+const { href, arrow = false } = Astro.props;
 ---
-<a class="button" href={href}><slot /></a>
+<a class="button" href={href}>
+  <slot />
+  {arrow && (
+    <svg class="button__arrow" viewBox="0 0 10 16" aria-hidden="true">
+      <path d="M2 2l6 6-6 6" />
+    </svg>
+  )}
+</a>
 
 <style>
   .button {
@@ -14,6 +22,9 @@ const { href } = Astro.props;
     --button-focus-width: 2px;
     --button-focus-offset: 3px;
     --button-line-height: 1.2;
+    --button-arrow-size: 0.8em;
+    --button-arrow-gap: 12px;
+    --button-arrow-stroke: 2.5px;
 
     display: inline-flex;
     width: 100%;
@@ -29,6 +40,17 @@ const { href } = Astro.props;
     line-height: var(--button-line-height);
     text-align: center;
     text-decoration: none;
+  }
+
+  .button__arrow {
+    width: var(--button-arrow-size);
+    height: var(--button-arrow-size);
+    margin-inline-start: var(--button-arrow-gap);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: var(--button-arrow-stroke);
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   .button:hover {

@@ -19,6 +19,16 @@
   --lh-h1: 1.12;
   --fs-button: clamp(16px, 1.6vw, 20px);
 
+  /* flagship */
+  --fs-h2: clamp(28px, 3.8vw, 48px);
+  --fs-h3: clamp(20px, 2.4vw, 30px);
+  --fs-card-title: clamp(20px, 2vw, 26px);
+  --fs-card-text: clamp(14px, 1.3vw, 17px);
+  --fs-hint: clamp(14px, 1.3vw, 16px);
+  --radius-card-sm: 16px;
+  --radius-card-lg: clamp(36px, 4vw, 56px);
+  --shadow-title: 3px 3px 0 var(--color-black);
+
   --font-main: 'Rubik Variable', system-ui, sans-serif;
   --fw-regular: 400;
   --fw-medium: 500;

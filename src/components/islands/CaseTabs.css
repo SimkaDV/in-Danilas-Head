@@ -1,0 +1,40 @@
+.case-tabs {
+  --tabs-gap: clamp(8px, 1vw, 12px);
+  --pill-padding-block: 10px;
+  --pill-padding-inline: 18px;
+  --pill-stroke: 1.5px;
+  --pill-focus-offset: 3px;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tabs-gap);
+}
+
+.case-tabs__pill {
+  padding: var(--pill-padding-block) var(--pill-padding-inline);
+  border: var(--pill-stroke) solid var(--color-dark);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-dark);
+  font-family: var(--font-main);
+  font-size: var(--fs-button);
+  font-weight: var(--fw-medium);
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.case-tabs__pill:hover {
+  background: var(--color-hero-glass);
+  color: var(--color-text-inverse);
+}
+
+.case-tabs__pill[aria-pressed='true'] {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-black);
+}
+
+.case-tabs__pill:focus-visible {
+  outline: var(--pill-stroke) solid var(--color-black);
+  outline-offset: var(--pill-focus-offset);
+}

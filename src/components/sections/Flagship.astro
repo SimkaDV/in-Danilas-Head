@@ -1,0 +1,158 @@
+---
+import { Image } from 'astro:assets';
+import flagshipCase from '@/assets/flagship-case.png';
+import Section from '@/components/layout/Section.astro';
+import CaseTabs from '@/components/islands/CaseTabs.tsx';
+import Button from '@/components/ui/Button.astro';
+import FeatureCard from '@/components/ui/FeatureCard.astro';
+import {
+  flagshipCta,
+  flagshipEyebrow,
+  flagshipFeatures,
+  flagshipFeaturesTitle,
+  flagshipTitle,
+  flagshipVariants,
+  flagshipVariantsLabel,
+} from '@/data/flagship';
+---
+<Section id="collection">
+  <div class="flagship" data-flagship>
+    <div class="flagship__showcase">
+      <div class="flagship__model">
+        <div class="flagship__blob" aria-hidden="true"></div>
+        <!-- пока один рендер на все варианты -->
+        {flagshipVariants.map((variant, index) => (
+          <Image
+            class="flagship__render"
+            src={flagshipCase}
+            alt={`${flagshipTitle}: ${variant.label.toLowerCase()}`}
+            data-case-variant={variant.id}
+            hidden={index !== 0}
+            widths={[480, 720, 970]}
+            sizes="(max-width: 720px) 90vw, 560px"
+          />
+        ))}
+      </div>
+
+      <div class="flagship__info">
+        <p class="flagship__eyebrow">{flagshipEyebrow}</p>
+        <h2 class="flagship__title">{flagshipTitle}</h2>
+        <p class="flagship__label">{flagshipVariantsLabel}</p>
+        <CaseTabs client:visible label={flagshipVariantsLabel} variants={flagshipVariants} />
+        <div class="flagship__cta">
+          <Button href={flagshipCta.href} arrow>{flagshipCta.label}</Button>
+          <p class="flagship__hint">{flagshipCta.hint}</p>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="flagship__features-title">{flagshipFeaturesTitle}</h3>
+    <div class="flagship__features">
+      {flagshipFeatures.map((feature) => (
+        <FeatureCard title={feature.title} text={feature.text} shape={feature.shape} />
+      ))}
+    </div>
+  </div>
+</Section>
+
+<style>
+  .flagship {
+    --flagship-column-gap: clamp(24px, 4vw, 56px);
+    --flagship-info-gap: clamp(12px, 1.4vw, 18px);
+    --flagship-features-gap: clamp(12px, 1.6vw, 20px);
+    --flagship-block-gap: clamp(32px, 5vw, 64px);
+    --flagship-cta-width: 260px;
+  }
+
+  .flagship__showcase {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: center;
+    gap: var(--flagship-column-gap);
+  }
+
+  .flagship__model {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1 / 0.8;
+  }
+
+  /* клякса под моделью */
+  .flagship__blob {
+    position: absolute;
+    inset: 18% 0 0 4%;
+    background: var(--color-accent);
+    clip-path: polygon(18% 0, 72% 6%, 100% 34%, 92% 78%, 60% 100%, 22% 94%, 0 62%, 6% 20%);
+  }
+
+  .flagship__render {
+    position: relative;
+    width: 92%;
+    height: auto;
+  }
+
+  .flagship__render[hidden] {
+    display: none;
+  }
+
+  .flagship__info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--flagship-info-gap);
+  }
+
+  .flagship__eyebrow,
+  .flagship__label {
+    color: var(--color-dark);
+    font-size: var(--fs-h3);
+    font-weight: var(--fw-bold);
+    line-height: 1.2;
+  }
+
+  .flagship__title {
+    color: var(--color-text-inverse);
+    font-size: var(--fs-h2);
+    font-weight: var(--fw-black);
+    line-height: 1.05;
+    text-shadow: var(--shadow-title);
+    white-space: nowrap;
+  }
+
+  .flagship__cta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flagship-info-gap);
+    width: min(100%, var(--flagship-cta-width));
+    margin-top: var(--flagship-info-gap);
+  }
+
+  .flagship__hint {
+    color: var(--color-dark);
+    font-size: var(--fs-hint);
+    line-height: 1.3;
+  }
+
+  .flagship__features-title {
+    margin-top: var(--flagship-block-gap);
+    margin-bottom: var(--flagship-features-gap);
+    color: var(--color-dark);
+    font-size: var(--fs-h3);
+    font-weight: var(--fw-bold);
+    line-height: 1.2;
+  }
+
+  .flagship__features {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--flagship-features-gap);
+  }
+
+  @media (max-width: 720px) {
+    .flagship__showcase,
+    .flagship__features {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

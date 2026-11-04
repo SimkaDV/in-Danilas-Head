@@ -26,3 +26,12 @@
 - Голова состоит из `src/assets/head-top.png` и `src/assets/head-bottom.png`.
 - Обе картинки головы целиком размещаются внутри панели.
 - Левая колонка сцены пока пустая под будущую строку «что это за место».
+
+## Flagship (коллекция кейсов)
+- Секция `src/components/sections/Flagship.astro`, якорь `#collection`.
+- Тексты, варианты кейса, фишки и кнопка в `src/data/flagship.ts`.
+- Кирпичики: `Button` (проп `arrow`), `FeatureCard` (проп `shape` a/b/c задаёт «вырезанный» угол).
+- Табы вариантов — React-остров `src/components/islands/CaseTabs.tsx` (`client:visible`): показывает элемент с `data-case-variant` активного варианта.
+- Рендер кейса `src/assets/flagship-case.png`, пока один на все варианты.
+- Цвета подогнаны под палитру: клякса и активный таб `--color-accent`, карточки `--color-deep`.
+- Кнопка пока ведёт на `#`, цены нет.
