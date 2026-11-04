@@ -1,0 +1,182 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
+interface Props {
+  title: string;
+  text: string;
+  category: string;
+  href: string;
+  price?: string;
+  ctaLabel: string;
+  image?: ImageMetadata;
+}
+
+// без image рисуется заглушка-кубик
+const { title, text, category, href, price, ctaLabel, image } = Astro.props;
+---
+<article class="model-card" data-catalog-category={category}>
+  <div class="model-card__media">
+    {image ? (
+      <Image class="model-card__image" src={image} alt={title} widths={[320, 480, 640]} sizes="(max-width: 720px) 90vw, 360px" />
+    ) : (
+      <svg class="model-card__placeholder" viewBox="0 0 48 48" aria-hidden="true">
+        <path d="M24 6 40 15v18L24 42 8 33V15z M8 15l16 9 16-9 M24 24v18" />
+      </svg>
+    )}
+  </div>
+  <div class="model-card__body">
+    <h3 class="model-card__title">{title}</h3>
+    <p class="model-card__text">{text}</p>
+  </div>
+  <div class="model-card__footer">
+    {price && <span class="model-card__price">{price}</span>}
+    <a class="model-card__cta" href={href}>
+      {ctaLabel}
+      <svg viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" /></svg>
+    </a>
+  </div>
+</article>
+
+<style>
+  .model-card {
+    --card-padding: clamp(14px, 1.6vw, 20px);
+    --card-gap: clamp(10px, 1.2vw, 14px);
+    --card-stroke: 2px;
+    --card-lift: -6px;
+    --card-shadow-hover: 6px 6px 0 var(--color-black);
+    --card-transition: 0.2s ease;
+    --cta-padding-block: 10px;
+    --cta-padding-inline: 16px;
+    --cta-arrow-size: 0.75em;
+    --cta-arrow-stroke: 2.5px;
+    --placeholder-size: 40%;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--card-gap);
+    padding: var(--card-padding);
+    border: var(--card-stroke) solid transparent;
+    border-radius: var(--radius-card-sm);
+    background: var(--color-deep);
+    color: var(--color-text-inverse);
+    transition: transform var(--card-transition), box-shadow var(--card-transition), border-color var(--card-transition);
+  }
+
+  .model-card[hidden] {
+    display: none;
+  }
+
+  .model-card:hover,
+  .model-card:focus-within {
+    transform: translateY(var(--card-lift));
+    border-color: var(--color-black);
+    box-shadow: var(--card-shadow-hover);
+  }
+
+  .model-card__media {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: var(--radius-card-sm);
+    background: var(--color-hero-glass);
+  }
+
+  .model-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--card-transition);
+  }
+
+  .model-card:hover .model-card__image {
+    transform: scale(1.05);
+  }
+
+  .model-card__placeholder {
+    width: var(--placeholder-size);
+    fill: none;
+    stroke: var(--color-bg);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+  }
+
+  .model-card__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: calc(var(--card-gap) / 2);
+  }
+
+  .model-card__title {
+    font-size: var(--fs-card-title);
+    font-weight: var(--fw-bold);
+    line-height: 1.15;
+  }
+
+  .model-card__text {
+    font-size: var(--fs-card-text);
+    font-weight: var(--fw-medium);
+    line-height: 1.35;
+  }
+
+  .model-card__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--card-gap);
+  }
+
+  .model-card__price {
+    font-size: var(--fs-hint);
+    font-weight: var(--fw-semibold);
+  }
+
+  .model-card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--card-gap) / 2);
+    padding: var(--cta-padding-block) var(--cta-padding-inline);
+    border-radius: var(--radius-pill);
+    background: var(--color-button);
+    color: var(--color-black);
+    font-size: var(--fs-hint);
+    font-weight: var(--fw-semibold);
+    line-height: 1.2;
+    text-decoration: none;
+  }
+
+  .model-card__cta svg {
+    width: var(--cta-arrow-size);
+    height: var(--cta-arrow-size);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: var(--cta-arrow-stroke);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .model-card:hover .model-card__cta,
+  .model-card__cta:hover {
+    background: var(--color-accent);
+  }
+
+  .model-card__cta:focus-visible {
+    outline: var(--card-stroke) solid var(--color-black);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .model-card,
+    .model-card__image {
+      transition: none;
+    }
+
+    .model-card:hover,
+    .model-card:focus-within {
+      transform: none;
+    }
+  }
+</style>

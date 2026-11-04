@@ -1,0 +1,127 @@
+---
+import Section from '@/components/layout/Section.astro';
+import CatalogFilter from '@/components/islands/CatalogFilter.tsx';
+import ModelCard from '@/components/ui/ModelCard.astro';
+import {
+  catalogCtaLabel,
+  catalogFilters,
+  catalogFiltersLabel,
+  catalogItems,
+  catalogNotes,
+  catalogTitle,
+} from '@/data/catalog';
+---
+<Section id="catalog">
+  <div class="catalog" data-catalog>
+    <h2 class="catalog__title">{catalogTitle}</h2>
+
+    <div class="catalog__scene">
+      <!-- сюда позже фото, а потом анимационная сцена конвейера -->
+      <div class="catalog__stage" aria-hidden="true">
+        <span class="catalog__stage-label">Тут будет конвейер</span>
+      </div>
+      {catalogNotes.map((note) => (
+        <p class:list={['catalog__note', `catalog__note--${note.id}`]}>{note.text}</p>
+      ))}
+    </div>
+
+    <CatalogFilter client:visible label={catalogFiltersLabel} filters={catalogFilters} />
+
+    <div class="catalog__grid">
+      {catalogItems.map((item) => (
+        <ModelCard
+          title={item.title}
+          text={item.text}
+          category={item.category}
+          price={item.price}
+          href={item.href}
+          ctaLabel={catalogCtaLabel}
+        />
+      ))}
+    </div>
+  </div>
+</Section>
+
+<style>
+  .catalog {
+    --catalog-gap: clamp(20px, 3vw, 40px);
+    --catalog-grid-gap: clamp(12px, 1.6vw, 20px);
+    --catalog-card-min: 240px;
+    --catalog-note-width: clamp(160px, 22vw, 260px);
+    --catalog-note-padding: clamp(12px, 1.4vw, 18px);
+    --catalog-note-offset: clamp(8px, 2vw, 24px);
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--catalog-gap);
+  }
+
+  .catalog__title {
+    color: var(--color-text-inverse);
+    font-size: var(--fs-h2);
+    font-weight: var(--fw-black);
+    line-height: 1.05;
+    text-align: center;
+    text-shadow: var(--shadow-title);
+    text-wrap: balance;
+  }
+
+  .catalog__scene {
+    position: relative;
+  }
+
+  .catalog__stage {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 7;
+    border: var(--stroke-panel) solid var(--color-black);
+    border-radius: var(--radius-panel);
+    background: var(--color-hero-glass);
+    box-shadow: var(--shadow-panel-inset);
+  }
+
+  .catalog__stage-label {
+    color: var(--color-bg);
+    font-size: var(--fs-h3);
+    font-weight: var(--fw-bold);
+  }
+
+  .catalog__note {
+    position: absolute;
+    width: var(--catalog-note-width);
+    padding: var(--catalog-note-padding);
+    border: var(--stroke-panel) solid var(--color-black);
+    color: var(--color-dark);
+    font-size: var(--fs-hint);
+    font-weight: var(--fw-semibold);
+    line-height: 1.3;
+  }
+
+  .catalog__note--printer {
+    top: var(--catalog-note-offset);
+    right: 28%;
+    border-radius: var(--radius-card-lg) var(--radius-card-lg) var(--radius-card-lg) var(--radius-card-sm);
+    background: var(--color-accent);
+  }
+
+  .catalog__note--catalog {
+    right: var(--catalog-note-offset);
+    bottom: 30%;
+    border-radius: var(--radius-card-lg) var(--radius-card-sm) var(--radius-card-lg) var(--radius-card-lg);
+    background: var(--color-button);
+  }
+
+  .catalog__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--catalog-card-min), 1fr));
+    gap: var(--catalog-grid-gap);
+  }
+
+  @media (max-width: 720px) {
+    .catalog__note {
+      position: static;
+      width: auto;
+      margin-top: var(--catalog-grid-gap);
+    }
+  }
+</style>
