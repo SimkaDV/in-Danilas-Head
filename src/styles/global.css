@@ -16,7 +16,11 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--color-bg);
+  background-color: var(--color-bg);
+  background-image: url('../assets/bg-grid.png');
+  background-repeat: repeat;
+  background-size: var(--bg-tile-size) var(--bg-tile-size);
+  background-position: top left;
   color: var(--color-text);
   font-family: var(--font-main);
   font-weight: var(--fw-regular);
