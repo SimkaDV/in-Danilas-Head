@@ -37,6 +37,29 @@
   --shadow-lift-sm: 3px 3px 0 var(--color-black);
   --transition-lift: 0.2s ease;
 
+  /* about: бенто-сетка интересов, theme карточки → цвет */
+  --color-interest-olive: #7A9371;
+  --color-interest-sage: #719381;
+  --color-interest-ocean: #42708C;
+  --color-interest-sky: #7A9FC0;
+  --color-interest-forest: #2C6045;
+  --color-interest-grass: #53AE66;
+  --fs-interest-title: clamp(24px, 2.8vw, 36px);
+  --lh-interest-title: 1.2;
+  --fs-interest-text: clamp(16px, 1.9vw, 24px);
+  --lh-interest-text: 1.3;
+  --radius-interest: clamp(32px, 3.9vw, 50px);
+  --radius-interest-media: clamp(20px, 2.4vw, 31px);
+  --interest-padding: clamp(20px, 2.4vw, 30px);
+  --interest-gap: clamp(16px, 2.8vw, 36px);
+  /* насколько картинка квадратной карточки вылезает за верхний край */
+  --interest-pop: clamp(16px, 2.2vw, 28px);
+  --stroke-interest-frame: 5px;
+  --radius-interest-frame: 10px;
+  /* шаблон на месте будущей картинки */
+  --color-interest-placeholder: rgba(255, 255, 255, 0.18);
+  --color-interest-placeholder-stroke: rgba(255, 255, 255, 0.55);
+
   --font-main: 'Rubik Variable', system-ui, sans-serif;
   --fw-regular: 400;
   --fw-medium: 500;

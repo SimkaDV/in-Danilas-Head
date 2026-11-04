@@ -1,0 +1,285 @@
+---
+import { getCollection } from 'astro:content';
+import Section from '@/components/layout/Section.astro';
+import Button from '@/components/ui/Button.astro';
+import InterestCard from '@/components/ui/InterestCard.astro';
+import { aboutTitle, aboutToggle, aboutVisibleCount } from '@/data/about';
+import interestsFile from '@/data/interests.json';
+
+// коллекция отдаёт карточки по id, а порядок в сетке — как в файле
+const fileOrder = interestsFile.map((card) => card.id);
+const interests = (await getCollection('interests')).sort(
+  (a, b) => fileOrder.indexOf(a.id) - fileOrder.indexOf(b.id),
+);
+// нижний ряд из трёх высоких карточек живёт в своей сетке
+const mainCards = interests.filter((card) => card.data.size !== 'tall');
+const bottomCards = interests.filter((card) => card.data.size === 'tall');
+const hasMore = interests.length > aboutVisibleCount;
+---
+<Section id="about">
+  <div class="about">
+    <h2 class="about__title">{aboutTitle}</h2>
+
+    <div
+      class="about__grid"
+      id="about-grid"
+      data-about-grid
+      data-visible-count={aboutVisibleCount}
+    >
+      <div class="about__main">
+        {mainCards.map(({ data }) => <InterestCard {...data} />)}
+      </div>
+      {bottomCards.length > 0 && (
+        <div class="about__bottom">
+          {bottomCards.map(({ data }) => <InterestCard {...data} />)}
+        </div>
+      )}
+    </div>
+
+    {hasMore && (
+      // без JS кнопка не нужна: сетка показана целиком
+      <div class="about__toggle" data-about-toggle-wrap hidden>
+        <Button
+          aria-expanded="false"
+          aria-controls="about-grid"
+          data-about-toggle
+          data-label-more={aboutToggle.more}
+          data-label-less={aboutToggle.less}
+        >
+          {aboutToggle.more}
+        </Button>
+      </div>
+    )}
+  </div>
+</Section>
+
+<style>
+  .about {
+    --about-title-gap: clamp(24px, 3vw, 36px);
+    --about-toggle-width: 320px;
+    /* высота ряда = ширина квадратной колонки, пропорции колонок как в макете 494 / 356 / 356 */
+    --about-row: calc((100cqi - 2 * var(--interest-gap)) * 356 / 1206);
+    --about-collapse-time: 0.6s;
+    --about-ease: cubic-bezier(0.22, 0.8, 0.24, 1);
+    --about-reveal-time: 0.45s;
+    --about-reveal-shift: 24px;
+    /* на сколько можно вылезти за свёрнутую сетку сверху и по бокам (тень, подъём при наведении) */
+    --about-clip-bleed: 40px;
+  }
+
+  .about__title {
+    margin-bottom: var(--about-title-gap);
+    color: var(--color-text-inverse);
+    font-size: var(--fs-h2);
+    font-weight: var(--fw-black);
+    line-height: 1.05;
+    text-align: center;
+  }
+
+  .about__grid {
+    position: relative;
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
+    gap: var(--interest-gap);
+    transition: height var(--about-collapse-time) var(--about-ease);
+  }
+
+  /* спрятанные карточки по очереди проявляются и всплывают, задержку ставит скрипт */
+  .about__grid :global([data-revealable]) {
+    transition:
+      opacity var(--about-reveal-time) ease var(--reveal-delay, 0s),
+      transform var(--about-reveal-time) var(--about-ease) var(--reveal-delay, 0s);
+  }
+
+  .about__grid :global([data-revealable][inert]) {
+    opacity: 0;
+    transform: translateY(var(--about-reveal-shift));
+  }
+
+  /* лишнее обрезается только снизу, картинки сверху и подъём карточек видны */
+  .about__grid[data-collapsed] {
+    clip-path: inset(calc(-1 * var(--about-clip-bleed)) calc(-1 * var(--about-clip-bleed)) 0);
+  }
+
+  .about__main {
+    display: grid;
+    grid-template-columns: 494fr 356fr 356fr;
+    grid-auto-rows: var(--about-row);
+    grid-auto-flow: row dense;
+    gap: var(--interest-gap);
+  }
+
+  .about__main :global(.interest--intro) {
+    grid-row: span 2;
+  }
+
+  .about__main :global(.interest--wide) {
+    grid-column: span 2;
+  }
+
+  /* высота 402 × 453 как в макете, но ряд растёт, если текст длиннее, и все три карточки вместе с ним */
+  .about__bottom {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: minmax(calc((100cqi - 2 * var(--interest-gap)) / 3 * 453 / 402), auto);
+    gap: var(--interest-gap);
+  }
+
+  .about__toggle {
+    width: min(100%, var(--about-toggle-width));
+    margin: var(--about-title-gap) auto 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .about__grid,
+    .about__grid :global([data-revealable]) {
+      transition: none;
+    }
+  }
+
+  /* планшет: две колонки, обе сетки сливаются в одну */
+  @media (max-width: 900px) {
+    .about__grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-auto-flow: row dense;
+    }
+
+    .about__main,
+    .about__bottom {
+      display: contents;
+    }
+
+    .about__grid :global(.interest--square),
+    .about__grid :global(.interest--tall) {
+      aspect-ratio: 1;
+    }
+
+    /* «Всем привет» растянут на два квадрата, картинка забирает лишнюю высоту */
+    .about__grid :global(.interest--intro .interest__media) {
+      flex: 1;
+      aspect-ratio: auto;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .about__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .about__main :global(.interest--intro),
+    .about__main :global(.interest--wide) {
+      grid-row: auto;
+      grid-column: auto;
+    }
+
+    /* в одну колонку растягивать нечего, возвращаем пропорции картинки */
+    .about__grid :global(.interest--intro .interest__media) {
+      flex: none;
+      aspect-ratio: 434 / 461;
+    }
+  }
+</style>
+
+<script>
+  const grid = document.querySelector<HTMLElement>('[data-about-grid]');
+  const wrap = document.querySelector<HTMLElement>('[data-about-toggle-wrap]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-about-toggle]');
+
+  if (grid && wrap && toggle) {
+    const visible = Number(grid.dataset.visibleCount);
+    const cards = [...grid.querySelectorAll<HTMLElement>('[data-interest]')];
+    let expanded = false;
+
+    // низ самой нижней из первых карточек, на любой ширине экрана
+    const collapsedHeight = () =>
+      Math.max(...cards.slice(0, visible).map((card) => card.offsetTop + card.offsetHeight));
+
+    const fullHeight = () => {
+      const current = grid.style.height;
+      grid.style.height = '';
+      const height = grid.offsetHeight;
+      grid.style.height = current;
+      return height;
+    };
+
+    const transitionMs = () => parseFloat(getComputedStyle(grid).transitionDuration) * 1000;
+    const hasTransition = () => transitionMs() > 0;
+
+    const hidden = cards.slice(visible);
+    const revealStep = 70;
+    hidden.forEach((card) => {
+      card.dataset.revealable = '';
+    });
+
+    const apply = () => {
+      hidden.forEach((card, index) => {
+        // при раскрытии лесенкой, при сворачивании гаснут все сразу
+        card.style.setProperty('--reveal-delay', expanded ? `${index * revealStep}ms` : '0ms');
+        card.inert = !expanded;
+      });
+      toggle.setAttribute('aria-expanded', String(expanded));
+      toggle.textContent = expanded ? toggle.dataset.labelLess! : toggle.dataset.labelMore!;
+    };
+
+    const collapse = () => {
+      grid.style.height = `${grid.offsetHeight}px`;
+      grid.offsetHeight; // фиксируем стартовую высоту для анимации
+      grid.dataset.collapsed = '';
+      grid.style.height = `${collapsedHeight()}px`;
+    };
+
+    const expand = () => {
+      grid.style.height = `${fullHeight()}px`;
+      // transitionend приходит не всегда (вкладка в фоне), поэтому ещё и по таймеру
+      window.setTimeout(finishExpand, transitionMs() + 50);
+    };
+
+    const finishExpand = () => {
+      if (!expanded) return;
+      delete grid.dataset.collapsed;
+      grid.style.height = '';
+      // иначе задержка лесенки останется и на подъёме при наведении
+      hidden.forEach((card) => card.style.removeProperty('--reveal-delay'));
+    };
+
+    // после сворачивания кнопка уезжает вверх: если она уйдёт за экран, едем за ней
+    const keepInView = () => {
+      const toggleTop = grid.getBoundingClientRect().top + window.scrollY + collapsedHeight();
+      if (toggleTop < window.scrollY) {
+        window.scrollTo({
+          top: toggleTop - window.innerHeight / 2,
+          behavior: hasTransition() ? 'smooth' : 'auto',
+        });
+      }
+    };
+
+    grid.addEventListener('transitionend', (event) => {
+      if (event.target === grid && event.propertyName === 'height') finishExpand();
+    });
+
+    toggle.addEventListener('click', () => {
+      expanded = !expanded;
+      apply();
+      if (expanded) {
+        expand();
+      } else {
+        collapse();
+        keepInView();
+      }
+    });
+
+    // ширина экрана или видимые карточки поменялись — пересчитываем свёрнутую высоту
+    const observer = new ResizeObserver(() => {
+      if (!expanded) grid.style.height = `${collapsedHeight()}px`;
+    });
+    observer.observe(grid);
+    cards.slice(0, visible).forEach((card) => observer.observe(card));
+
+    wrap.hidden = false;
+    grid.dataset.collapsed = '';
+    grid.style.height = `${collapsedHeight()}px`;
+    apply();
+  }
+</script>

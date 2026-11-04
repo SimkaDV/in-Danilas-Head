@@ -1,0 +1,76 @@
+[
+  {
+    "id": "intro",
+    "title": "Всем привет!",
+    "text": "Я много чем увлекаюсь и что-то делаю на крутом уровне, поэтому решил это всё делать здесь",
+    "image": "../assets/interests/intro.jpg",
+    "imageAlt": "Данёк за столиком с бокалом",
+    "size": "intro",
+    "theme": "olive"
+  },
+  {
+    "id": "museum",
+    "title": "Музей Сокровищница",
+    "text": "Штучки со всего света от разных мастеров, чудаков и случаев",
+    "image": "../assets/interests/museum.jpg",
+    "imageAlt": "Веер и полочка с вещицами на стене",
+    "size": "wide",
+    "theme": "sage"
+  },
+  {
+    "id": "books",
+    "title": "Заголовок",
+    "text": "Почитываю книги для досуга и дела",
+    "image": "../assets/interests/books.png",
+    "imageAlt": "Картинка про удовольствие от чтения книги",
+    "framed": true,
+    "size": "square",
+    "theme": "ocean"
+  },
+  {
+    "id": "vinyl",
+    "title": "Винил",
+    "text": "Слушаю и собираю случайный винил",
+    "image": "../assets/interests/vinyl.png",
+    "imageAlt": "Виниловая пластинка",
+    "size": "square",
+    "theme": "sky"
+  },
+  {
+    "id": "gallery",
+    "title": "Цифровая Галерея",
+    "text": "Фотографирую и собираю моменты, людей и объекты",
+    "image": "../assets/interests/gallery.png",
+    "imageAlt": "Глиняные горшки на заборе в сосновом лесу",
+    "size": "wide",
+    "theme": "forest"
+  },
+  {
+    "id": "films",
+    "title": "Фильмецы",
+    "text": "Гляжу всякое и оцениваю",
+    "size": "square",
+    "theme": "grass"
+  },
+  {
+    "id": "tea",
+    "title": "Чайная",
+    "text": "Попиваю чайчек, собираю посуду, постигаю мудрости",
+    "size": "tall",
+    "theme": "olive"
+  },
+  {
+    "id": "tables",
+    "title": "Таблицы Таблицы",
+    "text": "Раскладываю по полочкам всевозможные процессы",
+    "size": "tall",
+    "theme": "forest"
+  },
+  {
+    "id": "gallery-3d",
+    "title": "3D Галерея",
+    "text": "Моделю сцены и объекты, а потом ещё и анимирую их",
+    "size": "tall",
+    "theme": "forest"
+  }
+]

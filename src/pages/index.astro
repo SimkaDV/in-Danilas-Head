@@ -1,6 +1,6 @@
 ---
 import Layout from '@/layouts/Layout.astro';
-import Section from '@/components/layout/Section.astro';
+import About from '@/components/sections/About.astro';
 import Catalog from '@/components/sections/Catalog.astro';
 import Flagship from '@/components/sections/Flagship.astro';
 import Hero from '@/components/sections/Hero.astro';
@@ -8,8 +8,6 @@ import Hero from '@/components/sections/Hero.astro';
 <Layout>
   <Hero />
   <Flagship />
-  <Section id="about">
-    <h2 style="font-weight: var(--fw-bold)">Вторая секция</h2>
-  </Section>
+  <About />
   <Catalog />
 </Layout>
