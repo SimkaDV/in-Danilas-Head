@@ -1,19 +1,23 @@
 ---
-interface Props {
-  href: string;
-  arrow?: boolean;
-}
+import type { HTMLAttributes } from 'astro/types';
 
-const { href, arrow = false } = Astro.props;
+// без href рендерится <button type="button">
+type Props = HTMLAttributes<'a'> & HTMLAttributes<'button'> & {
+  href?: string;
+  arrow?: boolean;
+};
+
+const { href, arrow = false, class: className, ...rest } = Astro.props;
+const Tag = href ? 'a' : 'button';
 ---
-<a class="button" href={href}>
+<Tag class:list={['button', className]} href={href} type={href ? undefined : 'button'} {...rest}>
   <slot />
   {arrow && (
     <svg class="button__arrow" viewBox="0 0 10 16" aria-hidden="true">
       <path d="M2 2l6 6-6 6" />
     </svg>
   )}
-</a>
+</Tag>
 
 <style>
   .button {
@@ -28,6 +32,8 @@ const { href, arrow = false } = Astro.props;
 
     display: inline-flex;
     width: 100%;
+    border: none;
+    cursor: pointer;
     align-items: center;
     justify-content: center;
     padding: var(--button-padding-block) var(--button-padding-inline);

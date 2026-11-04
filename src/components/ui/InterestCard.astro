@@ -1,0 +1,206 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
+interface Props {
+  title: string;
+  text: string;
+  size: 'intro' | 'wide' | 'square' | 'tall';
+  theme: string;
+  image?: ImageMetadata;
+  imageAlt?: string;
+  framed?: boolean;
+  href?: string;
+}
+
+const { title, text, size, theme, image, imageAlt = '', framed = false, href } = Astro.props;
+const Tag = href ? 'a' : 'div';
+---
+<Tag
+  class:list={['interest', `interest--${size}`]}
+  href={href}
+  style={`--interest-bg: var(--color-interest-${theme})`}
+  data-interest
+>
+  <div class:list={['interest__media', { 'interest__media--framed': framed }]}>
+    {image ? (
+      <Image
+        class="interest__image"
+        src={image}
+        alt={imageAlt}
+        widths={[360, 540, 720, 1080]}
+        sizes="(max-width: 600px) 90vw, 500px"
+      />
+    ) : (
+      // картинки пока нет, держим место шаблоном
+      <div class="interest__placeholder" aria-hidden="true"></div>
+    )}
+  </div>
+
+  <div class="interest__body">
+    <h3 class="interest__title">{title}</h3>
+    <p class="interest__text">{text}</p>
+  </div>
+
+  {href && (
+    <span class="interest__arrow" aria-hidden="true">
+      <svg viewBox="0 0 16 16"><path d="M4 12L12 4M5 4h7v7" /></svg>
+    </span>
+  )}
+</Tag>
+
+<style>
+  .interest {
+    --interest-body-gap: 5px;
+    --interest-media-gap: 10px;
+    --interest-square-media: 74%;
+    --interest-wide-media: 55%;
+    --interest-arrow-size: clamp(36px, 3.4vw, 44px);
+    --interest-arrow-stroke: 2px;
+    --interest-lift: -6px;
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--interest-media-gap);
+    min-width: 0;
+    padding: var(--interest-padding);
+    border-radius: var(--radius-interest);
+    background: var(--interest-bg);
+    color: var(--color-text-inverse);
+    text-decoration: none;
+    transition: transform 0.2s ease;
+  }
+
+  .interest__media {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-interest-media);
+  }
+
+  .interest__media--framed {
+    border: var(--stroke-interest-frame) solid var(--color-black);
+    border-radius: var(--radius-interest-frame);
+  }
+
+  .interest__image,
+  .interest__placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .interest__placeholder {
+    border: var(--stroke-panel) dashed var(--color-interest-placeholder-stroke);
+    border-radius: inherit;
+    background: var(--color-interest-placeholder);
+  }
+
+  .interest__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--interest-body-gap);
+    font-weight: var(--fw-bold);
+  }
+
+  .interest__title {
+    font-size: var(--fs-interest-title);
+    line-height: var(--lh-interest-title);
+  }
+
+  .interest__text {
+    font-size: var(--fs-interest-text);
+    line-height: var(--lh-interest-text);
+  }
+
+  /* высокая карточка «Всем привет»: картинка сверху, текст под ней */
+  .interest--intro .interest__media {
+    aspect-ratio: 434 / 461;
+  }
+
+  /* длинная: текст слева, картинка справа во всю высоту */
+  .interest--wide {
+    flex-direction: row;
+  }
+
+  .interest--wide .interest__body {
+    flex: 1;
+  }
+
+  /* текст не сжимается уже самого длинного слова, поэтому уступает картинка, а не отступ */
+  .interest--wide .interest__media {
+    flex: 0 1 var(--interest-wide-media);
+    min-width: 0;
+    order: 1;
+  }
+
+  /* квадрат и нижний ряд: картинка вылезает за верхний край */
+  .interest--square,
+  .interest--tall {
+    gap: var(--interest-body-gap);
+    padding-top: 0;
+  }
+
+  .interest--square .interest__media,
+  .interest--tall .interest__media {
+    flex: none;
+    margin-top: calc(-1 * var(--interest-pop));
+  }
+
+  .interest--square .interest__media {
+    width: var(--interest-square-media);
+    aspect-ratio: 1;
+  }
+
+  .interest--tall .interest__media {
+    aspect-ratio: 4 / 3;
+  }
+
+  /* у ссылок стрелка в углу, чтобы было видно, что на карточку можно нажать */
+  .interest__arrow {
+    position: absolute;
+    top: var(--interest-padding);
+    right: var(--interest-padding);
+    display: grid;
+    place-items: center;
+    width: var(--interest-arrow-size);
+    height: var(--interest-arrow-size);
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: var(--color-black);
+  }
+
+  .interest__arrow svg {
+    width: 45%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: var(--interest-arrow-stroke);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  a.interest:hover {
+    transform: translateY(var(--interest-lift));
+  }
+
+  a.interest:focus-visible {
+    outline: var(--stroke-panel) solid var(--color-black);
+    outline-offset: var(--stroke-panel);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .interest { transition: none; }
+  }
+
+  @media (max-width: 600px) {
+    .interest--wide {
+      flex-direction: column;
+    }
+
+    .interest--wide .interest__media {
+      flex: none;
+      order: -1;
+      aspect-ratio: 16 / 10;
+    }
+  }
+</style>
