@@ -1,0 +1,261 @@
+---
+import { Image } from 'astro:assets';
+import Layout from '@/layouts/Layout.astro';
+import Section from '@/components/layout/Section.astro';
+import Button from '@/components/ui/Button.astro';
+import { catalogCtaLabel, catalogFilters, modelBackLabel, modelImageKinds, modelSpecsTitle } from '@/data/catalog';
+import { getApprovedModels } from '@/data/models';
+
+// страница генерируется для каждой approved-модели, адрес = имя папки
+export async function getStaticPaths() {
+  const models = await getApprovedModels();
+  return models.map((model) => ({ params: { slug: model.id }, props: { model } }));
+}
+
+const { model } = Astro.props;
+const { title, summary, description, category, price, images, specs } = model.data;
+const categoryLabel = catalogFilters.find((filter) => filter.id === category)?.label;
+const paragraphs = (description ?? summary).split(/\n\s*\n/);
+const [cover, ...rest] = images;
+---
+<Layout title={`${title} — В голове у Даньки`} description={summary}>
+  <Section>
+    <div class="model">
+      <a class="model__back" href="/#catalog">
+        <svg viewBox="0 0 10 16" aria-hidden="true"><path d="M8 2 2 8l6 6" /></svg>
+        {modelBackLabel}
+      </a>
+
+      <div class="model__layout">
+        <div class="model__gallery">
+          {cover ? (
+            <figure class="model__photo">
+              <Image src={cover.src} alt={cover.alt ?? title} widths={[480, 720, 960]} sizes="(max-width: 900px) 90vw, 600px" />
+              <figcaption class="model__kind">{modelImageKinds[cover.kind]}</figcaption>
+            </figure>
+          ) : (
+            <div class="model__photo">
+              <svg class="model__placeholder" viewBox="0 0 48 48" aria-hidden="true">
+                <path d="M24 6 40 15v18L24 42 8 33V15z M8 15l16 9 16-9 M24 24v18" />
+              </svg>
+            </div>
+          )}
+          {rest.length > 0 && (
+            <div class="model__thumbs">
+              {rest.map((photo) => (
+                <figure class="model__photo">
+                  <Image src={photo.src} alt={photo.alt ?? title} widths={[240, 480]} sizes="200px" />
+                  <figcaption class="model__kind">{modelImageKinds[photo.kind]}</figcaption>
+                </figure>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div class="model__info">
+          {categoryLabel && <span class="model__category">{categoryLabel}</span>}
+          <h1 class="model__title">{title}</h1>
+          <div class="model__text">
+            {paragraphs.map((text) => <p>{text}</p>)}
+          </div>
+
+          {specs.length > 0 && (
+            <div class="model__specs">
+              <h2 class="model__specs-title">{modelSpecsTitle}</h2>
+              <dl>
+                {specs.map((spec) => (
+                  <div class="model__spec">
+                    <dt>{spec.label}</dt>
+                    <dd>{spec.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
+
+          <div class="model__order">
+            {price && <span class="model__price">{price}</span>}
+            <!-- куда ведёт заказ, пока не решено -->
+            <Button href="#" arrow>{catalogCtaLabel}</Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Section>
+</Layout>
+
+<style>
+  .model {
+    --model-gap: clamp(20px, 3vw, 40px);
+    --model-gap-sm: clamp(10px, 1.2vw, 14px);
+    --model-panel-padding: clamp(16px, 2vw, 28px);
+    --model-thumb-min: 120px;
+    --model-back-arrow: 0.75em;
+    --model-arrow-stroke: 2.5px;
+    --model-kind-padding: 2px 10px;
+    --model-placeholder-size: 40%;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--model-gap);
+    color: var(--color-text-inverse);
+  }
+
+  .model__back {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: calc(var(--model-gap-sm) / 2);
+    color: inherit;
+    font-size: var(--fs-hint);
+    font-weight: var(--fw-semibold);
+    text-decoration: none;
+  }
+
+  .model__back:hover,
+  .model__back:focus-visible {
+    color: var(--color-accent);
+  }
+
+  .model__back svg {
+    width: var(--model-back-arrow);
+    height: var(--model-back-arrow);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: var(--model-arrow-stroke);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .model__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--model-gap);
+  }
+
+  .model__gallery {
+    display: flex;
+    flex-direction: column;
+    gap: var(--model-gap-sm);
+  }
+
+  /* первое фото большое, остальные сеткой под ним */
+  .model__thumbs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--model-thumb-min), 1fr));
+    gap: var(--model-gap-sm);
+  }
+
+  .model__photo {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: var(--stroke-panel) solid var(--color-black);
+    border-radius: var(--radius-card-sm);
+    background: var(--color-hero-glass);
+  }
+
+  .model__photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .model__placeholder {
+    width: var(--model-placeholder-size);
+    fill: none;
+    stroke: var(--color-bg);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+  }
+
+  /* метка «Рендер» / «Фото» */
+  .model__kind {
+    position: absolute;
+    top: var(--model-gap-sm);
+    left: var(--model-gap-sm);
+    padding: var(--model-kind-padding);
+    border-radius: var(--radius-pill);
+    background: var(--color-info);
+    color: var(--color-dark);
+    font-size: var(--fs-hint);
+    font-weight: var(--fw-semibold);
+  }
+
+  .model__info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--model-gap-sm);
+    padding: var(--model-panel-padding);
+    border-radius: var(--radius-card-sm);
+    background: var(--color-deep);
+  }
+
+  .model__category {
+    color: var(--color-accent);
+    font-size: var(--fs-hint);
+    font-weight: var(--fw-semibold);
+  }
+
+  .model__title {
+    font-size: var(--fs-h2);
+    font-weight: var(--fw-black);
+    line-height: 1.05;
+  }
+
+  .model__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--model-gap-sm);
+    font-size: var(--fs-card-text);
+    font-weight: var(--fw-medium);
+    line-height: 1.4;
+  }
+
+  .model__specs-title {
+    margin-bottom: calc(var(--model-gap-sm) / 2);
+    font-size: var(--fs-card-title);
+    font-weight: var(--fw-bold);
+  }
+
+  .model__spec {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--model-gap-sm);
+    padding-block: calc(var(--model-gap-sm) / 2);
+    border-bottom: 1px solid var(--color-hero-glass);
+    font-size: var(--fs-card-text);
+  }
+
+  .model__spec dt {
+    font-weight: var(--fw-medium);
+  }
+
+  .model__spec dd {
+    font-weight: var(--fw-semibold);
+    text-align: end;
+  }
+
+  .model__order {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--model-gap-sm);
+    margin-top: var(--model-gap-sm);
+  }
+
+  .model__price {
+    font-size: var(--fs-card-title);
+    font-weight: var(--fw-bold);
+  }
+
+  @media (max-width: 900px) {
+    .model__layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

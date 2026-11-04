@@ -4,13 +4,14 @@
 Палитра: bg #8EAE69, deep #4A6938, dark #292D25, accent #D4FB0B, info #7A9FC0 (второй акцент для подсказок и доп. информации, тот же голубой, что sky в бенто «Обо мне»).
 
 ## Структура
-- src/pages — страницы (пока одна главная `index.astro`)
+- src/pages — страницы: главная `index.astro` и шаблон страницы модели `catalog/[slug].astro`
 - src/layouts — `Layout.astro`: `<html>`, мета, фон-сетка, футер
 - src/components/ui — мелкие кирпичики (`Button`, `ScrollArrow`, `FeatureCard`, `InterestCard`, `ModelCard`)
 - src/components/layout — каркас (`Container`, `Section`, `Footer`); шапки (Header) пока нет
 - src/components/sections — блоки страниц (`Hero`, `Flagship`, `About`, `Catalog`)
 - src/components/islands — React-острова (`CaseTabs`, `CatalogFilter`)
-- src/data — тексты и данные без разметки (`hero.ts`, `flagship.ts`, `about.ts`, `interests.json`, `catalog.ts`)
+- src/data — тексты и данные без разметки (`hero.ts`, `flagship.ts`, `about.ts`, `interests.json`, `catalog.ts`, `models.ts`)
+- src/content/models — модели каталога, по папке на модель
 - src/assets — картинки, которые обрабатывает Astro (`head.webp`, `flagship-case.png`, `bg-grid.png`)
 - src/styles — tokens.css (все переменные) и global.css
 - docs — `ROADMAP.md` (план и статусы) и эти заметки
@@ -42,7 +43,14 @@
 
 ## Catalog (каталог моделей)
 - Секция `src/components/sections/Catalog.astro`, якорь `#catalog`.
-- Тексты, подсказки, фильтры и карточки в `src/data/catalog.ts` (пока заглушки: шесть «Календарей», цена «по запросу», ссылки на `#`).
+- Тексты, подсказки и фильтры в `src/data/catalog.ts`.
+- Модели — коллекция `models` (схема в `src/content.config.ts`): папка `src/content/models/<slug>/` с `model.json` и фотографиями. Имя папки латиницей через дефис = адрес страницы `/catalog/<slug>/`.
+- В каталог и на сайт попадают только модели со `status: "approved"`; `draft` и `archived` лежат в папке, но не собираются. Порядок в сетке — поле `order`.
+- Поля: `title`, `summary` (строка на карточке), `description` (текст страницы, абзацы через пустую строку), `category` (id фильтра), `price`, `images`, `specs` (`label` / `value`).
+- `images` — список `{ src, kind, alt }`: `src` путь от `model.json` (`./01-render.png`), `kind` — `render` или `photo`. Первое фото — обложка карточки и большое фото на странице, остальные сеткой под ним. Без фото рисуется кубик.
+- Шаблон новой модели — `src/content/models/_template/model.json` (папки с `_` не читаются). Скопировать папку, переименовать, заполнить, поставить `approved`.
+- Сейчас шесть заглушек `calendar-1…6` без фото.
+- Страница модели `src/pages/catalog/[slug].astro`: назад в каталог, галерея с метками «Рендер»/«Фото», описание, характеристики, цена, кнопка «Хочу такую» (пока на `#`).
 - Сцена конвейера — панель в стиле Hero с картинкой `src/assets/catalog-conveyor.png` (прозрачный фон, обрезана по низу, стоит на дне панели, 80% ширины). Позже заменится анимацией.
 - Две подсказки (`--color-info`, тёмный текст, обводка-«наклейка» `--shadow-sticker`) стопкой справа поверх панели, вторая сдвинута правее; на мобилке встают под панель. В подсказке про принтер фото `src/assets/catalog-printer.jpg`.
 - Карточка `src/components/ui/ModelCard.astro`: фото (проп `image`, без него рисуется кубик-заглушка), название, описание, цена и кнопка. Ховер: подъём, чёрная обводка и тень, кнопка становится `--color-accent`.
