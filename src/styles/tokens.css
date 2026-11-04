@@ -4,6 +4,8 @@
   --color-deep: #4A6938;
   --color-dark: #292D25;
   --color-accent: #D4FB0B;
+  --color-info: #7A9FC0; /* второй акцент: подсказки и доп. информация, = sky из бенто «Обо мне» */
+  --color-info-ring: rgba(255, 255, 255, 0.45);
   --color-text: #292D25;
   --color-text-inverse: #ffffff;
 
@@ -28,6 +30,8 @@
   --radius-card-sm: 16px;
   --radius-card-lg: clamp(36px, 4vw, 56px);
   --shadow-title: 3px 3px 0 var(--color-black);
+  /* «наклейка»: светлое внутреннее кольцо + жёсткая тень */
+  --shadow-sticker: inset 0 0 0 3px var(--color-info-ring), 4px 4px 0 var(--color-black);
 
   --font-main: 'Rubik Variable', system-ui, sans-serif;
   --fw-regular: 400;

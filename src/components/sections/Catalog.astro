@@ -1,4 +1,7 @@
 ---
+import { Image } from 'astro:assets';
+import conveyor from '@/assets/catalog-conveyor.png';
+import printerPhoto from '@/assets/catalog-printer.jpg';
 import Section from '@/components/layout/Section.astro';
 import CatalogFilter from '@/components/islands/CatalogFilter.tsx';
 import ModelCard from '@/components/ui/ModelCard.astro';
@@ -16,13 +19,32 @@ import {
     <h2 class="catalog__title">{catalogTitle}</h2>
 
     <div class="catalog__scene">
-      <!-- сюда позже фото, а потом анимационная сцена конвейера -->
-      <div class="catalog__stage" aria-hidden="true">
-        <span class="catalog__stage-label">Тут будет конвейер</span>
+      <!-- позже здесь будет анимационная сцена конвейера -->
+      <div class="catalog__stage">
+        <Image
+          class="catalog__conveyor"
+          src={conveyor}
+          alt="Принтер печатает модели, и они едут по конвейеру"
+          widths={[480, 720, 968]}
+          sizes="(max-width: 720px) 90vw, 800px"
+        />
       </div>
-      {catalogNotes.map((note) => (
-        <p class:list={['catalog__note', `catalog__note--${note.id}`]}>{note.text}</p>
-      ))}
+      <div class="catalog__notes">
+        {catalogNotes.map((note) => (
+        <div class:list={['catalog__note', `catalog__note--${note.id}`]}>
+          <p>{note.text}</p>
+          {note.id === 'printer' && (
+            <Image
+              class="catalog__note-photo"
+              src={printerPhoto}
+              alt="Мой принтер на рабочем месте"
+              widths={[160, 320]}
+              sizes="120px"
+            />
+          )}
+        </div>
+        ))}
+      </div>
     </div>
 
     <CatalogFilter client:visible label={catalogFiltersLabel} filters={catalogFilters} />
@@ -50,6 +72,13 @@ import {
     --catalog-note-width: clamp(160px, 22vw, 260px);
     --catalog-note-padding: clamp(12px, 1.4vw, 18px);
     --catalog-note-offset: clamp(8px, 2vw, 24px);
+    --catalog-note-printer-width: clamp(240px, 28vw, 330px);
+    --catalog-notes-right: var(--catalog-note-offset);
+    --catalog-notes-gap: clamp(6px, 0.8vw, 10px);
+    --catalog-note-shift: clamp(40px, 7vw, 100px);
+    --catalog-note-photo-width: clamp(72px, 9vw, 110px);
+    --catalog-stage-inset: calc(var(--radius-panel) * 0.6);
+    --catalog-conveyor-width: 80%;
 
     display: flex;
     flex-direction: column;
@@ -71,26 +100,39 @@ import {
   }
 
   .catalog__stage {
-    display: grid;
-    place-items: center;
+    display: flex;
+    align-items: flex-end;
     aspect-ratio: 16 / 7;
+    overflow: hidden;
+    padding-inline: var(--catalog-stage-inset);
     border: var(--stroke-panel) solid var(--color-black);
     border-radius: var(--radius-panel);
     background: var(--color-hero-glass);
     box-shadow: var(--shadow-panel-inset);
   }
 
-  .catalog__stage-label {
-    color: var(--color-bg);
-    font-size: var(--fs-h3);
-    font-weight: var(--fw-bold);
+  /* картинка обрезана по низу, поэтому стоит прямо на дне панели */
+  .catalog__conveyor {
+    width: var(--catalog-conveyor-width);
+    height: auto;
+  }
+
+  /* облачка стопкой справа, второе сдвинуто вправо */
+  .catalog__notes {
+    position: absolute;
+    top: var(--catalog-note-offset);
+    right: var(--catalog-notes-right);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--catalog-notes-gap);
   }
 
   .catalog__note {
-    position: absolute;
-    width: var(--catalog-note-width);
     padding: var(--catalog-note-padding);
     border: var(--stroke-panel) solid var(--color-black);
+    background: var(--color-info);
+    box-shadow: var(--shadow-sticker);
     color: var(--color-dark);
     font-size: var(--fs-hint);
     font-weight: var(--fw-semibold);
@@ -98,17 +140,26 @@ import {
   }
 
   .catalog__note--printer {
-    top: var(--catalog-note-offset);
-    right: 28%;
+    display: grid;
+    margin-inline-end: var(--catalog-note-shift);
+    grid-template-columns: minmax(0, 1fr) var(--catalog-note-photo-width);
+    align-items: center;
+    gap: var(--catalog-note-padding);
+    width: var(--catalog-note-printer-width);
     border-radius: var(--radius-card-lg) var(--radius-card-lg) var(--radius-card-lg) var(--radius-card-sm);
-    background: var(--color-accent);
+  }
+
+  .catalog__note-photo {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: var(--radius-card-sm);
   }
 
   .catalog__note--catalog {
-    right: var(--catalog-note-offset);
-    bottom: 30%;
+    width: var(--catalog-note-width);
     border-radius: var(--radius-card-lg) var(--radius-card-sm) var(--radius-card-lg) var(--radius-card-lg);
-    background: var(--color-button);
   }
 
   .catalog__grid {
@@ -118,10 +169,24 @@ import {
   }
 
   @media (max-width: 720px) {
-    .catalog__note {
+    .catalog__stage {
+      aspect-ratio: auto;
+      padding-top: var(--catalog-gap);
+    }
+
+    .catalog__conveyor {
+      width: 100%;
+    }
+
+    .catalog__notes {
       position: static;
-      width: auto;
+      align-items: stretch;
       margin-top: var(--catalog-grid-gap);
+    }
+
+    .catalog__note {
+      width: auto;
+      margin-inline-end: 0;
     }
   }
 </style>
