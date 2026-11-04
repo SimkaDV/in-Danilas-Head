@@ -1,7 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import headBottom from '@/assets/head-bottom.png';
-import headTop from '@/assets/head-top.png';
+import head from '@/assets/head.webp';
 import Button from '@/components/ui/Button.astro';
 import ScrollArrow from '@/components/ui/ScrollArrow.astro';
 import { heroLinks, heroNextHref, heroTitle } from '@/data/hero';
@@ -12,8 +11,7 @@ import { heroLinks, heroNextHref, heroTitle } from '@/data/hero';
     <div class="hero__stage">
       <!-- сюда позже строка «что это за место» -->
       <div class="hero__head" role="img" aria-label="Голова Даньки">
-        <Image src={headTop} alt="" loading="eager" />
-        <Image src={headBottom} alt="" loading="eager" />
+        <Image src={head} alt="" width={347} densities={[2, 3]} loading="eager" />
       </div>
       <nav class="hero__links" aria-label="Быстрый переход">
         {heroLinks.map((link) => <Button href={link.href}>{link.label}</Button>)}
@@ -33,7 +31,6 @@ import { heroLinks, heroNextHref, heroTitle } from '@/data/hero';
     --hero-arrow-gap: 24px;
     --hero-glass-blur: 1px;
     --hero-title-shadow: 3px 3px 0 var(--color-black);
-    --head-seam-overlap: -1px;
 
     padding-inline: var(--gutter);
   }
@@ -77,10 +74,6 @@ import { heroLinks, heroNextHref, heroTitle } from '@/data/hero';
     display: block;
     width: 100%;
     height: auto;
-  }
-
-  .hero__head img + img {
-    margin-top: var(--head-seam-overlap);
   }
 
   .hero__links {
