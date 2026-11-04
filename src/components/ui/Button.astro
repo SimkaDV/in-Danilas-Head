@@ -19,8 +19,6 @@ const { href, arrow = false } = Astro.props;
   .button {
     --button-padding-block: 20px;
     --button-padding-inline: 25px;
-    --button-focus-width: 2px;
-    --button-focus-offset: 3px;
     --button-line-height: 1.2;
     --button-arrow-size: 0.8em;
     --button-arrow-gap: 12px;
@@ -30,7 +28,9 @@ const { href, arrow = false } = Astro.props;
     width: 100%;
     align-items: center;
     justify-content: center;
-    padding: var(--button-padding-block) var(--button-padding-inline);
+    /* обводка съедает часть паддинга, чтобы размер не менялся */
+    padding: calc(var(--button-padding-block) - var(--stroke-lift)) calc(var(--button-padding-inline) - var(--stroke-lift));
+    border: var(--stroke-lift) solid transparent;
     border-radius: var(--radius-pill);
     background: var(--color-button);
     color: var(--color-black);
@@ -40,6 +40,7 @@ const { href, arrow = false } = Astro.props;
     line-height: var(--button-line-height);
     text-align: center;
     text-decoration: none;
+    transition: transform var(--transition-lift), box-shadow var(--transition-lift), border-color var(--transition-lift);
   }
 
   .button__arrow {
@@ -53,12 +54,23 @@ const { href, arrow = false } = Astro.props;
     stroke-linejoin: round;
   }
 
-  .button:hover {
+  .button:hover,
+  .button:focus-visible {
     background: var(--color-accent);
+    transform: translateY(var(--lift-hover));
+    border-color: var(--color-black);
+    box-shadow: var(--shadow-lift);
+    outline: none;
   }
 
-  .button:focus-visible {
-    outline: var(--button-focus-width) solid var(--color-black);
-    outline-offset: var(--button-focus-offset);
+  @media (prefers-reduced-motion: reduce) {
+    .button {
+      transition: none;
+    }
+
+    .button:hover,
+    .button:focus-visible {
+      transform: none;
+    }
   }
 </style>

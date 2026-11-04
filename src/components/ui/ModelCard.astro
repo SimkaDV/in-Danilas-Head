@@ -42,10 +42,6 @@ const { title, text, category, href, price, ctaLabel, image } = Astro.props;
   .model-card {
     --card-padding: clamp(14px, 1.6vw, 20px);
     --card-gap: clamp(10px, 1.2vw, 14px);
-    --card-stroke: 2px;
-    --card-lift: -6px;
-    --card-shadow-hover: 6px 6px 0 var(--color-black);
-    --card-transition: 0.2s ease;
     --cta-padding-block: 10px;
     --cta-padding-inline: 16px;
     --cta-arrow-size: 0.75em;
@@ -56,11 +52,11 @@ const { title, text, category, href, price, ctaLabel, image } = Astro.props;
     flex-direction: column;
     gap: var(--card-gap);
     padding: var(--card-padding);
-    border: var(--card-stroke) solid transparent;
+    border: var(--stroke-lift) solid transparent;
     border-radius: var(--radius-card-sm);
     background: var(--color-deep);
     color: var(--color-text-inverse);
-    transition: transform var(--card-transition), box-shadow var(--card-transition), border-color var(--card-transition);
+    transition: transform var(--transition-lift), box-shadow var(--transition-lift), border-color var(--transition-lift);
   }
 
   .model-card[hidden] {
@@ -69,9 +65,9 @@ const { title, text, category, href, price, ctaLabel, image } = Astro.props;
 
   .model-card:hover,
   .model-card:focus-within {
-    transform: translateY(var(--card-lift));
+    transform: translateY(var(--lift-hover));
     border-color: var(--color-black);
-    box-shadow: var(--card-shadow-hover);
+    box-shadow: var(--shadow-lift);
   }
 
   .model-card__media {
@@ -87,7 +83,7 @@ const { title, text, category, href, price, ctaLabel, image } = Astro.props;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform var(--card-transition);
+    transition: transform var(--transition-lift);
   }
 
   .model-card:hover .model-card__image {
@@ -138,7 +134,8 @@ const { title, text, category, href, price, ctaLabel, image } = Astro.props;
     display: inline-flex;
     align-items: center;
     gap: calc(var(--card-gap) / 2);
-    padding: var(--cta-padding-block) var(--cta-padding-inline);
+    padding: calc(var(--cta-padding-block) - var(--stroke-lift)) calc(var(--cta-padding-inline) - var(--stroke-lift));
+    border: var(--stroke-lift) solid transparent;
     border-radius: var(--radius-pill);
     background: var(--color-button);
     color: var(--color-black);
@@ -146,6 +143,7 @@ const { title, text, category, href, price, ctaLabel, image } = Astro.props;
     font-weight: var(--fw-semibold);
     line-height: 1.2;
     text-decoration: none;
+    transition: transform var(--transition-lift), box-shadow var(--transition-lift), border-color var(--transition-lift);
   }
 
   .model-card__cta svg {
@@ -163,19 +161,26 @@ const { title, text, category, href, price, ctaLabel, image } = Astro.props;
     background: var(--color-accent);
   }
 
+  /* карточка уже поднята, поэтому CTA поднимается чуть-чуть и только от своего ховера */
+  .model-card__cta:hover,
   .model-card__cta:focus-visible {
-    outline: var(--card-stroke) solid var(--color-black);
-    outline-offset: 3px;
+    transform: translateY(var(--lift-hover-sm));
+    border-color: var(--color-black);
+    box-shadow: var(--shadow-lift-sm);
+    outline: none;
   }
 
   @media (prefers-reduced-motion: reduce) {
     .model-card,
-    .model-card__image {
+    .model-card__image,
+    .model-card__cta {
       transition: none;
     }
 
     .model-card:hover,
-    .model-card:focus-within {
+    .model-card:focus-within,
+    .model-card__cta:hover,
+    .model-card__cta:focus-visible {
       transform: none;
     }
   }

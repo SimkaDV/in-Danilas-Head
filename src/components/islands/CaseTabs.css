@@ -3,7 +3,6 @@
   --pill-padding-block: 10px;
   --pill-padding-inline: 18px;
   --pill-stroke: 1.5px;
-  --pill-focus-offset: 3px;
 
   display: flex;
   flex-wrap: wrap;
@@ -21,6 +20,7 @@
   font-weight: var(--fw-medium);
   line-height: 1.2;
   cursor: pointer;
+  transition: transform var(--transition-lift), box-shadow var(--transition-lift), border-color var(--transition-lift);
 }
 
 .case-tabs__pill:hover {
@@ -28,13 +28,36 @@
   color: var(--color-text-inverse);
 }
 
-.case-tabs__pill[aria-pressed='true'] {
-  border-color: var(--color-accent);
-  background: var(--color-accent);
-  color: var(--color-black);
+.case-tabs__pill:hover,
+.case-tabs__pill:focus-visible {
+  transform: translateY(var(--lift-hover-sm));
+  border-color: var(--color-black);
+  box-shadow: var(--shadow-lift-sm);
+  outline: none;
 }
 
-.case-tabs__pill:focus-visible {
-  outline: var(--pill-stroke) solid var(--color-black);
-  outline-offset: var(--pill-focus-offset);
+/* активная таблетка «нажата»: стоит на месте без тени, ховер её не поднимает */
+.case-tabs__pill[aria-pressed='true'] {
+  border-color: var(--color-black);
+  background: var(--color-accent);
+  color: var(--color-black);
+  transform: none;
+  box-shadow: none;
+  cursor: default;
+}
+
+.case-tabs__pill[aria-pressed='true']:focus-visible {
+  transform: translateY(var(--lift-hover-sm));
+  box-shadow: var(--shadow-lift-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .case-tabs__pill {
+    transition: none;
+  }
+
+  .case-tabs__pill:hover,
+  .case-tabs__pill:focus-visible {
+    transform: none;
+  }
 }

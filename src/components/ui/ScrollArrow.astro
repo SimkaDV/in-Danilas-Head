@@ -21,6 +21,7 @@ const { href } = Astro.props;
     display: block;
     width: var(--arrow-width);
     color: var(--color-black);
+    transition: transform var(--transition-lift), filter var(--transition-lift);
   }
 
   .scroll-arrow svg {
@@ -33,8 +34,27 @@ const { href } = Astro.props;
     stroke-linejoin: round;
   }
 
+  /* у стрелки нет плашки, поэтому вместо обводки и тени-коробки — тень самой линии */
+  .scroll-arrow:hover,
+  .scroll-arrow:focus-visible {
+    color: var(--color-accent);
+    transform: translateY(var(--lift-hover-sm));
+    filter: drop-shadow(var(--shadow-lift-sm));
+  }
+
   .scroll-arrow:focus-visible {
     outline: var(--arrow-focus-width) solid var(--color-black);
     outline-offset: var(--arrow-focus-offset);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-arrow {
+      transition: none;
+    }
+
+    .scroll-arrow:hover,
+    .scroll-arrow:focus-visible {
+      transform: none;
+    }
   }
 </style>

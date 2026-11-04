@@ -29,6 +29,14 @@
   --radius-card-lg: clamp(36px, 4vw, 56px);
   --shadow-title: 3px 3px 0 var(--color-black);
 
+  /* объёмный ховер: карточки и кнопки, -sm для мелких кнопок */
+  --stroke-lift: 2px;
+  --lift-hover: -6px;
+  --lift-hover-sm: -3px;
+  --shadow-lift: 6px 6px 0 var(--color-black);
+  --shadow-lift-sm: 3px 3px 0 var(--color-black);
+  --transition-lift: 0.2s ease;
+
   --font-main: 'Rubik Variable', system-ui, sans-serif;
   --fw-regular: 400;
   --fw-medium: 500;
