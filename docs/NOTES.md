@@ -4,13 +4,16 @@
 Палитра: bg #8EAE69, deep #4A6938, dark #292D25, accent #D4FB0B.
 
 ## Структура
-- src/components/ui — мелкие кирпичики (Button, Pill, Card)
-- src/components/layout — каркас (Container, Section, Footer, Header)
-- src/components/sections — блоки страниц (Hero, About, ...)
-- src/components/islands — React-компоненты (Player, Model3D)
-- src/data — данные без разметки (меню, плейлисты)
+- src/pages — страницы (пока одна главная `index.astro`)
+- src/layouts — `Layout.astro`: `<html>`, мета, фон-сетка, футер
+- src/components/ui — мелкие кирпичики (`Button`, `ScrollArrow`, `FeatureCard`, `InterestCard`, `ModelCard`)
+- src/components/layout — каркас (`Container`, `Section`, `Footer`); шапки (Header) пока нет
+- src/components/sections — блоки страниц (`Hero`, `Flagship`, `About`, `Catalog`)
+- src/components/islands — React-острова (`CaseTabs`, `CatalogFilter`)
+- src/data — тексты и данные без разметки (`hero.ts`, `flagship.ts`, `about.ts`, `interests.json`, `catalog.ts`)
+- src/assets — картинки, которые обрабатывает Astro (`head.webp`, `flagship-case.png`, `bg-grid.png`)
 - src/styles — tokens.css (все переменные) и global.css
-- docs — roadmap и заметки
+- docs — `ROADMAP.md` (план и статусы) и эти заметки
 
 ## Правила
 1. Цвета, размеры, шрифты только через переменные из tokens.css.
@@ -59,3 +62,12 @@
 - Планшет (≤900px) — две колонки, телефон (≤600px) — одна.
 - Свёрнута до первых `aboutVisibleCount` карточек, кнопка раскрывает остальные. Без JS видна вся сетка.
 - `Button` без `href` рендерится как `<button>`.
+
+## Главная сейчас
+Порядок на `src/pages/index.astro`: Hero → Flagship (`#collection`) → About (`#about`) → Catalog (`#catalog`) → футер.
+
+## Roadmap
+План, календарь и статусы по пунктам: [ROADMAP.md](ROADMAP.md). Обновлять его вместе с этим файлом.
+
+Не влито в `main`:
+- `claude/website-review-continue-e5d214` — ru/en, шкала `--space-*`, `npm run check`, CLAUDE.md, Rubik в `package.json`.
