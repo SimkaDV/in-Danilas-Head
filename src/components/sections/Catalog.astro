@@ -9,10 +9,12 @@ import {
   catalogCtaLabel,
   catalogFilters,
   catalogFiltersLabel,
-  catalogItems,
   catalogNotes,
   catalogTitle,
 } from '@/data/catalog';
+import { getApprovedModels, modelHref } from '@/data/models';
+
+const models = await getApprovedModels();
 ---
 <Section id="catalog">
   <div class="catalog" data-catalog>
@@ -50,14 +52,15 @@ import {
     <CatalogFilter client:visible label={catalogFiltersLabel} filters={catalogFilters} />
 
     <div class="catalog__grid">
-      {catalogItems.map((item) => (
+      {models.map(({ id, data }) => (
         <ModelCard
-          title={item.title}
-          text={item.text}
-          category={item.category}
-          price={item.price}
-          href={item.href}
+          title={data.title}
+          text={data.summary}
+          category={data.category}
+          price={data.price}
+          href={modelHref(id)}
           ctaLabel={catalogCtaLabel}
+          image={data.images[0]?.src}
         />
       ))}
     </div>

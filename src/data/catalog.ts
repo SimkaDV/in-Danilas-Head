@@ -14,14 +14,10 @@ export const catalogFilters = [
   { id: 'storage', label: 'Хранение' },
 ];
 
-// пока заглушки: фото, цены и ссылки появятся позже
-export const catalogItems = [
-  { id: 'calendar-1', title: 'Календарь', text: 'На нём каждый день хочется сделать особенным', category: 'home', price: 'Цена по запросу', href: '#' },
-  { id: 'calendar-2', title: 'Календарь', text: 'На нём каждый день хочется сделать особенным', category: 'storage', price: 'Цена по запросу', href: '#' },
-  { id: 'calendar-3', title: 'Календарь', text: 'На нём каждый день хочется сделать особенным', category: 'home', price: 'Цена по запросу', href: '#' },
-  { id: 'calendar-4', title: 'Календарь', text: 'На нём каждый день хочется сделать особенным', category: 'storage', price: 'Цена по запросу', href: '#' },
-  { id: 'calendar-5', title: 'Календарь', text: 'На нём каждый день хочется сделать особенным', category: 'home', price: 'Цена по запросу', href: '#' },
-  { id: 'calendar-6', title: 'Календарь', text: 'На нём каждый день хочется сделать особенным', category: 'storage', price: 'Цена по запросу', href: '#' },
-];
-
+// сами модели лежат в src/content/models, см. коллекцию models в content.config.ts
 export const catalogCtaLabel = 'Хочу такую';
+
+// страница модели
+export const modelBackLabel = 'Назад в каталог';
+export const modelSpecsTitle = 'Характеристики';
+export const modelImageKinds = { render: 'Рендер', photo: 'Фото' } as const;
