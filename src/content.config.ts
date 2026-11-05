@@ -16,7 +16,7 @@ const interests = defineCollection({
       framed: z.boolean().optional(),
       // без href карточка некликабельная
       href: z.string().optional(),
-      // тип ячейки: intro — высокая на два ряда, wide — длинная, square — квадрат, tall — нижний ряд
+      // тип ячейки: intro – высокая на два ряда, wide – длинная, square – квадрат, tall – нижний ряд
       size: z.enum(['intro', 'wide', 'square', 'tall']),
       // цвет фона, см. --color-interest-* в tokens.css
       theme: z.enum(['olive', 'sage', 'ocean', 'sky', 'forest', 'grass']),
@@ -38,7 +38,7 @@ const models = defineCollection({
     z.object({
       // в каталоге и на сайте только approved, остальное лежит в папке и ждёт
       status: z.enum(['draft', 'approved', 'archived']),
-      // меньше — раньше в сетке
+      // меньше – раньше в сетке
       order: z.number().default(0),
       title: z.string(),
       // строка на карточке
@@ -47,8 +47,8 @@ const models = defineCollection({
       description: z.string().optional(),
       category: z.enum(categoryIds),
       price: z.string().optional(),
-      // фото лежат в папке модели, src — путь относительно model.json (./01-render.png),
-      // kind: render — рендер модели, photo — живое фото; первое в списке — обложка карточки
+      // фото лежат в папке модели, src – путь относительно model.json (./01-render.png),
+      // kind: render – рендер модели, photo – живое фото; первое в списке – обложка карточки
       images: z
         .array(
           z.object({

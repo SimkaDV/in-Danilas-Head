@@ -28,7 +28,7 @@
   color: var(--color-text-inverse);
 }
 
-/* поднята: наведение, фокус или прокрутка (data-lifted ставит scroll-lift.ts) — одно состояние */
+/* поднята: наведение, фокус или прокрутка (data-lifted ставит scroll-lift.ts) – одно состояние */
 .case-tabs__pill:focus-visible,
 .case-tabs__pill[data-lifted] {
   transform: translateY(var(--lift-hover-sm));

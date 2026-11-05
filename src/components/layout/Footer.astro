@@ -1,16 +1,225 @@
 ---
+import { getCollection } from 'astro:content';
 import Container from './Container.astro';
+import {
+  footerCopyright,
+  footerInterestsTitle,
+  footerNav,
+  footerProject,
+  footerSocials,
+  footerTitle,
+} from '@/data/footer';
+import interestsFile from '@/data/interests.json';
+
+// интересы в порядке файла, без приветственной карточки
+const fileOrder = interestsFile.map((card) => card.id);
+const interests = (await getCollection('interests'))
+  .filter((card) => card.data.size !== 'intro')
+  .sort((a, b) => fileOrder.indexOf(a.id) - fileOrder.indexOf(b.id));
 ---
 <footer class="footer">
-  <Container>
-    <p>© 2026 В голове у Даньки</p>
+  <Container class="footer__inner">
+    <div class="footer__brand">
+      <p class="footer__title">{footerTitle}</p>
+      <ul class="footer__socials">
+        {footerSocials.map((social) => (
+          <li>
+            <a class="footer__social" href={social.href} aria-label={social.label}>
+              {social.id === 'telegram' && (
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 4 3 11l6 2.5M21 4l-3 16-9-6.5M21 4 9 13.5V19l3-3.5" /></svg>
+              )}
+              {social.id === 'instagram' && (
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5" /><circle cx="12" cy="12" r="4" /><path d="M17 7h.01" /></svg>
+              )}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <nav class="footer__columns" aria-label="Подвал">
+      <div class="footer__column">
+        <p class="footer__heading">{footerNav.title}</p>
+        <ul class="footer__links">
+          {footerNav.links.map((link) => <li><a class="footer__link" href={link.href}>{link.label}</a></li>)}
+        </ul>
+      </div>
+
+      <div class="footer__column">
+        <p class="footer__heading">{footerInterestsTitle}</p>
+        <ul class="footer__links">
+          {interests.map(({ data }) => (
+            <li>
+              {data.href ? (
+                <a class="footer__link" href={data.href}>{data.title}</a>
+              ) : (
+                <span class="footer__link footer__link--soon">{data.title}</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="footer__column">
+        <p class="footer__heading">{footerProject.title}</p>
+        <ul class="footer__links">
+          {footerProject.links.map((link) => <li><a class="footer__link" href={link.href}>{link.label}</a></li>)}
+        </ul>
+      </div>
+    </nav>
+
+    <p class="footer__copyright">{footerCopyright}</p>
   </Container>
 </footer>
 
 <style>
   .footer {
+    --footer-padding: clamp(40px, 5vw, 64px);
+    --footer-gap: clamp(28px, 4vw, 48px);
+    --footer-links-gap: 10px;
+    --footer-social-size: 48px;
+    --footer-social-icon: 24px;
+
     background: var(--color-dark);
     color: var(--color-text-inverse);
-    padding-block: 32px;
+    padding-block: var(--footer-padding);
+  }
+
+  .footer :global(.footer__inner) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: var(--footer-gap);
+  }
+
+  .footer ul {
+    padding: 0;
+    list-style: none;
+  }
+
+  .footer__brand {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--footer-gap);
+  }
+
+  .footer__title {
+    font-size: var(--fs-h3);
+    font-weight: var(--fw-black);
+    line-height: 1.1;
+    text-shadow: var(--shadow-title);
+  }
+
+  .footer__socials {
+    display: flex;
+    gap: var(--footer-links-gap);
+  }
+
+  .footer__social {
+    display: grid;
+    place-items: center;
+    width: var(--footer-social-size);
+    height: var(--footer-social-size);
+    border: var(--stroke-lift) solid transparent;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: var(--color-black);
+    transition: transform var(--transition-lift), box-shadow var(--transition-lift), border-color var(--transition-lift);
+  }
+
+  .footer__social svg {
+    width: var(--footer-social-icon);
+    height: var(--footer-social-icon);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .footer__social:focus-visible {
+    transform: translateY(var(--lift-hover-sm));
+    border-color: var(--color-black);
+    box-shadow: var(--shadow-lift-sm);
+    outline: none;
+  }
+
+  .footer__columns {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--footer-gap);
+  }
+
+  .footer__heading {
+    margin-bottom: var(--footer-links-gap);
+    color: var(--color-accent);
+    font-size: var(--fs-hint);
+    font-weight: var(--fw-bold);
+  }
+
+  .footer__links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--footer-links-gap);
+    font-size: var(--fs-card-text);
+    font-weight: var(--fw-medium);
+    line-height: 1.3;
+  }
+
+  .footer__link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  a.footer__link:focus-visible {
+    color: var(--color-accent);
+    text-decoration: underline;
+    outline: none;
+  }
+
+  /* страницы интереса ещё нет */
+  .footer__link--soon {
+    opacity: 0.5;
+  }
+
+  .footer__copyright {
+    grid-column: 1 / -1;
+    opacity: 0.6;
+    font-size: var(--fs-hint);
+  }
+
+  /* на таче :hover залипает после тапа, поэтому ховер только для мыши */
+  @media (hover: hover) {
+    .footer__social:hover {
+      transform: translateY(var(--lift-hover-sm));
+      border-color: var(--color-black);
+      box-shadow: var(--shadow-lift-sm);
+    }
+
+    a.footer__link:hover {
+      color: var(--color-accent);
+      text-decoration: underline;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .footer :global(.footer__inner) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .footer__columns {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .footer__social {
+      transition: none;
+    }
+
+    .footer__social:hover,
+    .footer__social:focus-visible {
+      transform: none;
+    }
   }
 </style>

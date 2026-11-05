@@ -1,20 +1,20 @@
-# NOTES — В голове у Даньки
+# NOTES – В голове у Даньки
 Стек: Astro + React (React только для интерактивных «островов»).
 Шрифт: только Rubik (@fontsource-variable/rubik).
 Палитра: bg #8EAE69, deep #4A6938, dark #292D25, accent #D4FB0B, info #7A9FC0 (второй акцент для подсказок и доп. информации, тот же голубой, что sky в бенто «Обо мне»).
 
 ## Структура
-- src/pages — страницы: главная `index.astro` и шаблон страницы модели `catalog/[slug].astro`
-- src/layouts — `Layout.astro`: `<html>`, мета, фон-сетка, футер
-- src/components/ui — мелкие кирпичики (`Button`, `ScrollArrow`, `FeatureCard`, `InterestCard`, `ModelCard`)
-- src/components/layout — каркас (`Container`, `Section`, `Footer`); шапки (Header) пока нет
-- src/components/sections — блоки страниц (`Hero`, `Flagship`, `About`, `Catalog`)
-- src/components/islands — React-острова (`CaseTabs`, `CatalogFilter`)
-- src/data — тексты и данные без разметки (`hero.ts`, `flagship.ts`, `about.ts`, `interests.json`, `catalog.ts`, `models.ts`)
-- src/content/models — модели каталога, по папке на модель
-- src/assets — картинки, которые обрабатывает Astro (`head.webp`, `flagship-case.png`, `bg-grid.png`)
-- src/styles — tokens.css (все переменные) и global.css
-- docs — `ROADMAP.md` (план и статусы) и эти заметки
+- src/pages – страницы: главная `index.astro` и шаблон страницы модели `catalog/[slug].astro`
+- src/layouts – `Layout.astro`: `<html>`, мета, фон-сетка, футер
+- src/components/ui – мелкие кирпичики (`Button`, `ScrollArrow`, `FeatureCard`, `InterestCard`, `ModelCard`)
+- src/components/layout – каркас (`Container`, `Section`, `Footer`); шапки (Header) пока нет
+- src/components/sections – блоки страниц (`Hero`, `Flagship`, `About`, `Catalog`)
+- src/components/islands – React-острова (`CaseTabs`, `CatalogFilter`)
+- src/data – тексты и данные без разметки (`hero.ts`, `flagship.ts`, `about.ts`, `footer.ts`, `interests.json`, `catalog.ts`, `models.ts`)
+- src/content/models – модели каталога, по папке на модель
+- src/assets – картинки, которые обрабатывает Astro (`head.webp`, `flagship-case.png`, `bg-grid.png`)
+- src/styles – tokens.css (все переменные) и global.css
+- docs – `ROADMAP.md` (план и статусы) и эти заметки
 
 ## Правила
 1. Цвета, размеры, шрифты только через переменные из tokens.css.
@@ -23,12 +23,13 @@
 4. Импорты через алиас @/.
 5. Каждый заход заканчивается рабочим состоянием, которое можно задеплоить.
 6. Объёмный ховер у всех кнопок и карточек: подъём, чёрная обводка и жёсткая тень из токенов `--lift-hover`, `--shadow-lift`, `--stroke-lift`, `--transition-lift` (мелкие кнопки берут `--lift-hover-sm` и `--shadow-lift-sm`). В покое обводка `transparent` и вычтена из паддинга, чтобы ничего не прыгало. То же состояние на `:focus-visible`, под `prefers-reduced-motion` подъём и анимация выключены.
+7. Никаких длинных тире (U+2014): только среднее «–», в текстах сайта, коде и документах. Буква «ё» пишется везде, где она есть.
 
 ## Hero
 - Секция собрана в `src/components/sections/Hero.astro` из `Button` и `ScrollArrow` в `src/components/ui/`.
 - Тексты и ссылки хранятся отдельно в `src/data/hero.ts`.
 - В `src/styles/tokens.css` добавлены временные токены панели, кнопок, заголовка и радиусов.
-- Голова — одна картинка `src/assets/head.webp` (1041px, прозрачный фон), Astro отдаёт её в 1x/2x/3x.
+- Голова – одна картинка `src/assets/head.webp` (1041px, прозрачный фон), Astro отдаёт её в 1x/2x/3x.
 - Голова целиком размещается внутри панели.
 - Три кнопки-якоря под панелью, в ряд по центру. Десктоп: ряд `--hero-links-width` (`clamp(600px, 60%, 860px)`), ширина кнопки по подписи. Мобилка (≤720px): кнопки друг под другом, каждая во всю ширину.
 - Левая колонка сцены пока пустая под будущую строку «что это за место».
@@ -37,7 +38,7 @@
 - Секция `src/components/sections/Flagship.astro`, якорь `#collection`.
 - Тексты, варианты кейса, фишки и кнопка в `src/data/flagship.ts`.
 - Кирпичики: `Button` (проп `arrow`), `FeatureCard` (проп `shape` a/b/c задаёт «вырезанный» угол).
-- Табы вариантов — React-остров `src/components/islands/CaseTabs.tsx` (`client:visible`): показывает элемент с `data-case-variant` активного варианта.
+- Табы вариантов – React-остров `src/components/islands/CaseTabs.tsx` (`client:visible`): показывает элемент с `data-case-variant` активного варианта.
 - Рендер кейса `src/assets/flagship-case.png`, пока один на все варианты.
 - Цвета подогнаны под палитру: клякса и активный таб `--color-accent`, карточки `--color-deep`.
 - Кнопка пока ведёт на `#`, цены нет.
@@ -45,36 +46,42 @@
 ## Catalog (каталог моделей)
 - Секция `src/components/sections/Catalog.astro`, якорь `#catalog`.
 - Тексты, подсказки и фильтры в `src/data/catalog.ts`.
-- Модели — коллекция `models` (схема в `src/content.config.ts`): папка `src/content/models/<slug>/` с `model.json` и фотографиями. Имя папки латиницей через дефис = адрес страницы `/catalog/<slug>/`.
-- В каталог и на сайт попадают только модели со `status: "approved"`; `draft` и `archived` лежат в папке, но не собираются. Порядок в сетке — поле `order`.
+- Модели – коллекция `models` (схема в `src/content.config.ts`): папка `src/content/models/<slug>/` с `model.json` и фотографиями. Имя папки латиницей через дефис = адрес страницы `/catalog/<slug>/`.
+- В каталог и на сайт попадают только модели со `status: "approved"`; `draft` и `archived` лежат в папке, но не собираются. Порядок в сетке – поле `order`.
 - Поля: `title`, `summary` (строка на карточке), `description` (текст страницы, абзацы через пустую строку), `category` (id фильтра), `price`, `images`, `specs` (`label` / `value`).
-- `images` — список `{ src, kind, alt }`: `src` путь от `model.json` (`./01-render.png`), `kind` — `render` или `photo`. Первое фото — обложка карточки и большое фото на странице, остальные сеткой под ним. Без фото рисуется кубик.
-- Шаблон новой модели — `src/content/models/_template/model.json` (папки с `_` не читаются). Скопировать папку, переименовать, заполнить, поставить `approved`.
+- `images` – список `{ src, kind, alt }`: `src` путь от `model.json` (`./01-render.png`), `kind` – `render` или `photo`. Первое фото – обложка карточки и большое фото на странице, остальные сеткой под ним. Без фото рисуется кубик.
+- Шаблон новой модели – `src/content/models/_template/model.json` (папки с `_` не читаются). Скопировать папку, переименовать, заполнить, поставить `approved`.
 - Сейчас шесть заглушек `calendar-1…6` без фото.
 - Страница модели `src/pages/catalog/[slug].astro`: назад в каталог, галерея с метками «Рендер»/«Фото», описание, характеристики, цена, кнопка «Хочу такую» (пока на `#`).
-- Сцена конвейера — панель в стиле Hero с картинкой `src/assets/catalog-conveyor.png` (прозрачный фон, обрезана по низу, стоит на дне панели, 80% ширины). Позже заменится анимацией.
+- Сцена конвейера – панель в стиле Hero с картинкой `src/assets/catalog-conveyor.png` (прозрачный фон, обрезана по низу, стоит на дне панели, 80% ширины). Позже заменится анимацией.
 - Две подсказки (`--color-info`, тёмный текст, обводка-«наклейка» `--shadow-sticker`) стопкой справа поверх панели, вторая сдвинута правее; на мобилке встают под панель. В подсказке про принтер фото `src/assets/catalog-printer.jpg`: это кнопка со значком «развернуть» в углу, по нажатию фото открывается крупно в `<dialog>` (закрыть крестиком, Esc или тапом мимо фото), окно по размеру фото. На мобилке фото занимает 40% подсказки.
 - Карточка `src/components/ui/ModelCard.astro`: фото (проп `image`, без него рисуется кубик-заглушка), название, описание, цена и кнопка. Ховер: подъём, чёрная обводка и тень, кнопка становится `--color-accent`.
 - На мобилке (≤720px) сетка в две колонки, карточка плотнее: меньше паддинги, шрифты `--fs-card-*-compact`, цена над кнопкой, кнопка во всю ширину.
-- Фильтр — React-остров `src/components/islands/CatalogFilter.tsx` (`client:visible`), прячет карточки по `data-catalog-category`; использует стили таблеток из `CaseTabs.css`.
+- Фильтр – React-остров `src/components/islands/CatalogFilter.tsx` (`client:visible`), прячет карточки по `data-catalog-category`; использует стили таблеток из `CaseTabs.css`.
 
 ## Ховер кнопок
-- `Button`, карточка модели и карточки-ссылки интересов — полный подъём (`--lift-hover`, `--shadow-lift`).
-- CTA карточки (поднимается только от своего ховера, без двойного подъёма с карточкой) и таблетки `CaseTabs.css` (табы кейса и фильтр каталога) — маленький (`-sm`).
+- `Button`, карточка модели и карточки-ссылки интересов – полный подъём (`--lift-hover`, `--shadow-lift`).
+- CTA карточки (поднимается только от своего ховера, без двойного подъёма с карточкой) и таблетки `CaseTabs.css` (табы кейса и фильтр каталога) – маленький (`-sm`).
 - Активная таблетка (`aria-pressed=true`) «нажата»: акцентная, с чёрной обводкой, стоит на месте без тени; подъём только на `:focus-visible`.
 - `ScrollArrow` без плашки: сама по кругу (2 с) загорается `--color-accent`, поднимается на `-sm` и получает тень самой линии (`drop-shadow(var(--shadow-lift-sm))`); на ховере и фокусе держится поднятой.
-- `:hover` только внутри `@media (hover: hover)`, иначе на таче он залипает после тапа. `:focus-visible` — снаружи.
-- Подъём при прокрутке: `src/scripts/scroll-lift.ts` (подключён в `Layout.astro`) ставит `data-lifted` элементам с `data-scroll-lift`, пока они в зоне: на таче 55–85% высоты экрана, с мышью 35–65%. Стили `[data-lifted]` те же, что у ховера, поэтому «поднята» — одно состояние, источники не складываются. Сейчас `data-scroll-lift` у `Button`, CTA карточки модели и таблеток. Кнопки, вошедшие в зону разом (ряд), поднимаются по очереди слева направо с шагом `--lift-stagger`. Под `prefers-reduced-motion` скрипт ничего не делает.
+- `:hover` только внутри `@media (hover: hover)`, иначе на таче он залипает после тапа. `:focus-visible` – снаружи.
+- Подъём при прокрутке: `src/scripts/scroll-lift.ts` (подключён в `Layout.astro`) ставит `data-lifted` элементам с `data-scroll-lift`, пока они в зоне: на таче 55–85% высоты экрана, с мышью 35–65%. Стили `[data-lifted]` те же, что у ховера, поэтому «поднята» – одно состояние, источники не складываются. Сейчас `data-scroll-lift` у `Button`, CTA карточки модели и таблеток. Кнопки, вошедшие в зону разом (ряд), поднимаются по очереди слева направо с шагом `--lift-stagger`. Под `prefers-reduced-motion` скрипт ничего не делает.
 
 ## About (бенто-сетка интересов)
 - Секция `src/components/sections/About.astro`, якорь `#about`. Заголовок, кнопка и число видимых карточек в `src/data/about.ts`.
 - Карточки в `src/data/interests.json`, схема в `src/content.config.ts` (коллекция `interests`). Порядок в файле = порядок в сетке.
-- Поля карточки: `size` (intro / wide / square / tall), `theme` (цвет `--color-interest-*`), `image` и `imageAlt` (нет картинки — рисуется шаблон), `framed` (чёрная рамка), `href` (есть — карточка-ссылка со стрелкой в углу).
+- Поля карточки: `size` (intro / wide / square / tall), `theme` (цвет `--color-interest-*`), `image` и `imageAlt` (нет картинки – рисуется шаблон), `framed` (чёрная рамка), `href` (есть – карточка-ссылка со стрелкой в углу).
 - Картинки в `src/assets/interests/`. У Чайной, Таблиц, 3D Галереи и Фильмецов пока шаблоны, цвета нижнего ряда временные.
-- Десктоп: сетка 494 / 356 / 356 из макета, высота ряда считается от ширины (`cqi`). Нижний ряд с `tall` — отдельная сетка из трёх колонок.
-- Планшет (≤900px) — две колонки, телефон (≤600px) — одна. На телефоне фото длинной карточки 16:10 во всю ширину, квадратное фото той же высоты (ширина 10/16), квадратная карточка по высоте содержимого.
+- Десктоп: сетка 494 / 356 / 356 из макета, высота ряда считается от ширины (`cqi`). Нижний ряд с `tall` – отдельная сетка из трёх колонок.
+- Планшет (≤900px) – две колонки, телефон (≤600px) – одна. На телефоне фото длинной карточки 16:10 во всю ширину, квадратное фото той же высоты (ширина 10/16), квадратная карточка по высоте содержимого.
 - Свёрнута до первых `aboutVisibleCount` карточек, кнопка раскрывает остальные. Без JS видна вся сетка.
 - `Button` без `href` рендерится как `<button>`.
+
+## Footer (подвал)
+- `src/components/layout/Footer.astro`, подключён в `Layout.astro`, поэтому есть на всех страницах. Тексты и ссылки в `src/data/footer.ts`.
+- Слева название и круглые кнопки соцсетей (Telegram, Instagram; пока на `#`) с маленьким подъёмом `-sm`.
+- Три колонки: «Навигация» (Главная + якоря из `heroLinks` с `/` впереди, чтобы работали со страницы модели), «Интересы» (из `interests.json` без intro; ссылкой только те, у кого есть `href`, остальные бледные), «Проект» (Команда и Политика конфиденциальности, пока на `#`).
+- Снизу ©-строка. На мобилке (≤720px) название и соцсети сверху, колонки ссылок в две.
 
 ## Главная сейчас
 Порядок на `src/pages/index.astro`: Hero → Flagship (`#collection`) → About (`#about`) → Catalog (`#catalog`) → футер.
@@ -83,4 +90,4 @@
 План, календарь и статусы по пунктам: [ROADMAP.md](ROADMAP.md). Обновлять его вместе с этим файлом.
 
 Не влито в `main`:
-- `claude/website-review-continue-e5d214` — ru/en, шкала `--space-*`, `npm run check`, CLAUDE.md, Rubik в `package.json`.
+- `claude/website-review-continue-e5d214` – ru/en, шкала `--space-*`, `npm run check`, CLAUDE.md, Rubik в `package.json`.

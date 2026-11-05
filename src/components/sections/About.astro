@@ -6,7 +6,7 @@ import InterestCard from '@/components/ui/InterestCard.astro';
 import { aboutTitle, aboutToggle, aboutVisibleCount } from '@/data/about';
 import interestsFile from '@/data/interests.json';
 
-// коллекция отдаёт карточки по id, а порядок в сетке — как в файле
+// коллекция отдаёт карточки по id, а порядок в сетке – как в файле
 const fileOrder = interestsFile.map((card) => card.id);
 const interests = (await getCollection('interests')).sort(
   (a, b) => fileOrder.indexOf(a.id) - fileOrder.indexOf(b.id),
@@ -275,7 +275,7 @@ const hasMore = interests.length > aboutVisibleCount;
       }
     });
 
-    // ширина экрана или видимые карточки поменялись — пересчитываем свёрнутую высоту
+    // ширина экрана или видимые карточки поменялись – пересчитываем свёрнутую высоту
     const observer = new ResizeObserver(() => {
       if (!expanded) grid.style.height = `${collapsedHeight()}px`;
     });

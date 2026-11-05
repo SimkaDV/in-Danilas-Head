@@ -1,4 +1,4 @@
-export const aboutTitle = 'Я Данёк и это мой сайт';
+export const aboutTitle = 'Я Данёк, и это мой сайт';
 
 // сколько карточек видно, пока сетка свёрнута (первые два ряда)
 export const aboutVisibleCount = 4;
