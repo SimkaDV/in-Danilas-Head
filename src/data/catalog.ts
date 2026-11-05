@@ -6,6 +6,11 @@ export const catalogNotes = [
   { id: 'catalog', text: 'И каталог, чтобы поглядеть поближе, а при желании заказать у меня' },
 ];
 
+// фото принтера в подсказке открывается крупно
+export const catalogPhotoAlt = 'Мой принтер на рабочем месте';
+export const catalogPhotoZoomLabel = 'Открыть фото принтера крупно';
+export const catalogPhotoCloseLabel = 'Закрыть фото';
+
 export const catalogFiltersLabel = 'Категории моделей';
 
 export const catalogFilters = [

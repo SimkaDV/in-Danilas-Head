@@ -10,6 +10,9 @@ import {
   catalogFilters,
   catalogFiltersLabel,
   catalogNotes,
+  catalogPhotoAlt,
+  catalogPhotoCloseLabel,
+  catalogPhotoZoomLabel,
   catalogTitle,
 } from '@/data/catalog';
 import { getApprovedModels, modelHref } from '@/data/models';
@@ -36,18 +39,38 @@ const models = await getApprovedModels();
         <div class:list={['catalog__note', `catalog__note--${note.id}`]}>
           <p>{note.text}</p>
           {note.id === 'printer' && (
-            <Image
-              class="catalog__note-photo"
-              src={printerPhoto}
-              alt="Мой принтер на рабочем месте"
-              widths={[160, 320]}
-              sizes="120px"
-            />
+            <button class="catalog__zoom" type="button" data-zoom-open aria-label={catalogPhotoZoomLabel}>
+              <Image
+                class="catalog__note-photo"
+                src={printerPhoto}
+                alt=""
+                widths={[200, 400]}
+                sizes="(max-width: 720px) 40vw, 140px"
+              />
+              <span class="catalog__zoom-icon" aria-hidden="true">
+                <svg viewBox="0 0 16 16"><path d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9" /></svg>
+              </span>
+            </button>
           )}
         </div>
         ))}
       </div>
     </div>
+
+    <dialog class="catalog__lightbox" data-zoom-dialog aria-label={catalogPhotoAlt}>
+      <Image
+        class="catalog__lightbox-photo"
+        src={printerPhoto}
+        alt={catalogPhotoAlt}
+        widths={[640, 1080, 1600]}
+        sizes="(max-width: 960px) 92vw, 900px"
+      />
+      <form method="dialog">
+        <button class="catalog__lightbox-close" aria-label={catalogPhotoCloseLabel}>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
+        </button>
+      </form>
+    </dialog>
 
     <CatalogFilter client:visible label={catalogFiltersLabel} filters={catalogFilters} />
 
@@ -75,11 +98,15 @@ const models = await getApprovedModels();
     --catalog-note-width: clamp(160px, 22vw, 260px);
     --catalog-note-padding: clamp(12px, 1.4vw, 18px);
     --catalog-note-offset: clamp(8px, 2vw, 24px);
-    --catalog-note-printer-width: clamp(240px, 28vw, 330px);
+    --catalog-note-printer-width: clamp(260px, 30vw, 360px);
     --catalog-notes-right: var(--catalog-note-offset);
     --catalog-notes-gap: clamp(6px, 0.8vw, 10px);
     --catalog-note-shift: clamp(40px, 7vw, 100px);
-    --catalog-note-photo-width: clamp(72px, 9vw, 110px);
+    --catalog-note-photo-width: clamp(96px, 11vw, 140px);
+    --catalog-zoom-icon-size: 28px;
+    --catalog-zoom-icon-inset: 6px;
+    --catalog-lightbox-max-width: 92vw;
+    --catalog-lightbox-max-height: 90vh;
     --catalog-stage-inset: calc(var(--radius-panel) * 0.6);
     --catalog-conveyor-width: 80%;
 
@@ -152,12 +179,125 @@ const models = await getApprovedModels();
     border-radius: var(--radius-card-lg) var(--radius-card-lg) var(--radius-card-lg) var(--radius-card-sm);
   }
 
+  /* фото — кнопка: по нажатию открывается крупно */
+  .catalog__zoom {
+    position: relative;
+    display: block;
+    padding: 0;
+    border: var(--stroke-lift) solid var(--color-black);
+    border-radius: var(--radius-card-sm);
+    background: none;
+    cursor: zoom-in;
+    transition: transform var(--transition-lift), box-shadow var(--transition-lift);
+  }
+
   .catalog__note-photo {
+    display: block;
     width: 100%;
     height: auto;
     aspect-ratio: 3 / 4;
     object-fit: cover;
+    border-radius: calc(var(--radius-card-sm) - var(--stroke-lift));
+  }
+
+  /* ненавязчивый значок «развернуть» в углу, чтобы было понятно, что фото открывается */
+  .catalog__zoom-icon,
+  .catalog__lightbox-close {
+    display: grid;
+    place-items: center;
+    width: var(--catalog-zoom-icon-size);
+    height: var(--catalog-zoom-icon-size);
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: var(--color-black);
+  }
+
+  .catalog__zoom-icon {
+    position: absolute;
+    right: var(--catalog-zoom-icon-inset);
+    bottom: var(--catalog-zoom-icon-inset);
+  }
+
+  .catalog__zoom-icon svg,
+  .catalog__lightbox-close svg {
+    width: 55%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .catalog__zoom:focus-visible {
+    transform: translateY(var(--lift-hover-sm));
+    box-shadow: var(--shadow-lift-sm);
+    outline: none;
+  }
+
+  /* окно по размеру фото, без пустых полей */
+  .catalog__lightbox {
+    width: fit-content;
+    max-width: var(--catalog-lightbox-max-width);
+    max-height: var(--catalog-lightbox-max-height);
+    margin: auto;
+    padding: 0;
+    overflow: hidden;
+    border: var(--stroke-panel) solid var(--color-black);
     border-radius: var(--radius-card-sm);
+    background: var(--color-dark);
+  }
+
+  .catalog__lightbox::backdrop {
+    background: var(--color-backdrop);
+  }
+
+  .catalog__lightbox-photo {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: calc(var(--catalog-lightbox-max-width) - 2 * var(--stroke-panel));
+    max-height: calc(var(--catalog-lightbox-max-height) - 2 * var(--stroke-panel));
+  }
+
+  .catalog__lightbox-close {
+    position: absolute;
+    top: var(--catalog-zoom-icon-inset);
+    right: var(--catalog-zoom-icon-inset);
+    --catalog-zoom-icon-size: 40px;
+
+    padding: 0;
+    border: var(--stroke-lift) solid var(--color-black);
+    cursor: pointer;
+    transition: transform var(--transition-lift), box-shadow var(--transition-lift);
+  }
+
+  .catalog__lightbox-close:focus-visible {
+    transform: translateY(var(--lift-hover-sm));
+    box-shadow: var(--shadow-lift-sm);
+    outline: none;
+  }
+
+  /* на таче :hover залипает после тапа, поэтому ховер только для мыши */
+  @media (hover: hover) {
+    .catalog__zoom:hover,
+    .catalog__lightbox-close:hover {
+      transform: translateY(var(--lift-hover-sm));
+      box-shadow: var(--shadow-lift-sm);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .catalog__zoom,
+    .catalog__lightbox-close {
+      transition: none;
+    }
+
+    .catalog__zoom:hover,
+    .catalog__zoom:focus-visible,
+    .catalog__lightbox-close:hover,
+    .catalog__lightbox-close:focus-visible {
+      transform: none;
+    }
   }
 
   .catalog__note--catalog {
@@ -172,6 +312,15 @@ const models = await getApprovedModels();
   }
 
   @media (max-width: 720px) {
+    .catalog {
+      --catalog-grid-gap: 10px;
+    }
+
+    /* как на маркетплейсах: две карточки в ряд */
+    .catalog__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .catalog__stage {
       aspect-ratio: auto;
       padding-top: var(--catalog-gap);
@@ -191,5 +340,22 @@ const models = await getApprovedModels();
       width: auto;
       margin-inline-end: 0;
     }
+
+    .catalog__note--printer {
+      grid-template-columns: minmax(0, 1fr) 40%;
+    }
   }
 </style>
+
+<script>
+  // фото принтера открывается крупно в <dialog>; закрыть — крестиком, Esc или тапом мимо фото
+  const dialog = document.querySelector<HTMLDialogElement>('[data-zoom-dialog]');
+  const open = document.querySelector<HTMLButtonElement>('[data-zoom-open]');
+
+  if (dialog && open) {
+    open.addEventListener('click', () => dialog.showModal());
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+  }
+</script>

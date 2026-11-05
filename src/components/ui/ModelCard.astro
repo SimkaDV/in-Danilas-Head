@@ -18,7 +18,7 @@ const { title, text, category, href, price, ctaLabel, image } = Astro.props;
 <article class="model-card" data-catalog-category={category}>
   <div class="model-card__media">
     {image ? (
-      <Image class="model-card__image" src={image} alt={title} widths={[320, 480, 640]} sizes="(max-width: 720px) 90vw, 360px" />
+      <Image class="model-card__image" src={image} alt={title} widths={[320, 480, 640]} sizes="(max-width: 720px) 45vw, 360px" />
     ) : (
       <svg class="model-card__placeholder" viewBox="0 0 48 48" aria-hidden="true">
         <path d="M24 6 40 15v18L24 42 8 33V15z M8 15l16 9 16-9 M24 24v18" />
@@ -182,6 +182,33 @@ const { title, text, category, href, price, ctaLabel, image } = Astro.props;
       transform: translateY(var(--lift-hover-sm));
       border-color: var(--color-black);
       box-shadow: var(--shadow-lift-sm);
+    }
+  }
+
+  /* в две колонки на телефоне: плотнее, цена над кнопкой, кнопка во всю ширину */
+  @media (max-width: 720px) {
+    .model-card {
+      --card-padding: 10px;
+      --card-gap: 8px;
+      --cta-padding-block: 9px;
+      --cta-padding-inline: 10px;
+    }
+
+    .model-card__title {
+      font-size: var(--fs-card-title-compact);
+    }
+
+    .model-card__text {
+      font-size: var(--fs-card-text-compact);
+    }
+
+    .model-card__footer {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .model-card__cta {
+      justify-content: center;
     }
   }
 

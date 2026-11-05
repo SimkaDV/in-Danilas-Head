@@ -26,12 +26,15 @@
   --fs-h3: clamp(20px, 2.4vw, 30px);
   --fs-card-title: clamp(20px, 2vw, 26px);
   --fs-card-text: clamp(14px, 1.3vw, 17px);
+  --fs-card-title-compact: 17px; /* карточка модели в две колонки на телефоне */
+  --fs-card-text-compact: 13px;
   --fs-hint: clamp(14px, 1.3vw, 16px);
   --radius-card-sm: 16px;
   --radius-card-lg: clamp(36px, 4vw, 56px);
   --shadow-title: 3px 3px 0 var(--color-black);
   /* «наклейка»: светлое внутреннее кольцо + жёсткая тень */
   --shadow-sticker: inset 0 0 0 3px var(--color-info-ring), 4px 4px 0 var(--color-black);
+  --color-backdrop: rgba(0, 0, 0, 0.75); /* затемнение под фото, открытым крупно */
 
   /* объёмный ховер: карточки и кнопки, -sm для мелких кнопок */
   --stroke-lift: 2px;
