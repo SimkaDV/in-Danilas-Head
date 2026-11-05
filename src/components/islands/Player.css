@@ -1,0 +1,446 @@
+/* полоса плеера: три блока, носитель строго по центру и вылезает за полосу сверху и снизу */
+.player {
+  --player-pad: clamp(12px, 2vw, 24px);
+  --player-inner-gap: 4px;
+  --player-pop-width: 280px;
+  --player-pop-gap: 12px;
+  --player-pop-padding: 20px;
+  --player-pop-close-size: 44px;
+  --player-show-padding: 2px 8px;
+  --player-link-padding: 8px 16px;
+
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--player-gap);
+  height: var(--player-height);
+  padding-inline: var(--player-pad);
+  border-radius: var(--player-radius);
+  background: var(--color-dark);
+  color: var(--color-accent);
+  font-family: var(--font-main);
+  pointer-events: auto;
+}
+
+/* кнопки стилей: гнездо с огоньком и подпись под ним */
+.player__modes {
+  display: flex;
+  justify-self: end;
+  gap: var(--player-button-gap);
+}
+
+.player__mode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--player-inner-gap);
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--fs-player-label);
+  font-weight: var(--fw-medium);
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.player__socket {
+  display: grid;
+  place-items: center;
+  width: var(--player-button-size);
+  height: var(--player-button-size);
+  border: var(--stroke-lift) solid transparent;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-black) 45%, var(--color-dark));
+  box-shadow: var(--shadow-player-socket);
+  transition: transform var(--transition-lift), box-shadow var(--transition-lift), border-color var(--transition-lift);
+}
+
+.player__dot {
+  width: var(--player-dot-size);
+  height: var(--player-dot-size);
+  border-radius: 50%;
+  background: var(--color-player-dot);
+  transition: background-color var(--transition-lift), box-shadow var(--transition-lift);
+}
+
+/* включённая кнопка «нажата»: огонёк горит, гнездо стоит на месте */
+.player__mode[aria-pressed='true'] {
+  cursor: default;
+}
+
+.player__mode[aria-pressed='true'] .player__dot {
+  background: var(--color-accent);
+  box-shadow: var(--shadow-player-glow);
+}
+
+.player__mode:focus-visible {
+  outline: none;
+}
+
+.player__mode:focus-visible .player__socket {
+  transform: translateY(var(--lift-hover-sm));
+  border-color: var(--color-black);
+  box-shadow: var(--shadow-lift-sm);
+}
+
+@media (hover: hover) {
+  .player__mode[aria-pressed='false']:hover .player__socket {
+    transform: translateY(var(--lift-hover-sm));
+    border-color: var(--color-black);
+    box-shadow: var(--shadow-lift-sm);
+  }
+
+  .player__mode[aria-pressed='false']:hover .player__dot {
+    background: color-mix(in srgb, var(--color-accent) 60%, var(--color-player-dot));
+  }
+}
+
+/* носитель: тёмное кольцо, внутри заглушка своего стиля */
+.player__deck {
+  position: relative;
+  width: var(--player-disc-size);
+  height: var(--player-height);
+}
+
+.player__disc {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: var(--player-disc-size);
+  height: var(--player-disc-size);
+  margin-top: calc(var(--player-disc-size) / -2);
+  padding: var(--player-disc-ring);
+  border-radius: 50%;
+  background: var(--color-dark);
+}
+
+.player__disc::before,
+.player__disc::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+}
+
+/* сам носитель */
+.player__disc::before {
+  inset: var(--player-disc-ring);
+  background: var(--color-accent);
+  animation: player-spin var(--player-spin) linear infinite paused;
+  transition: background var(--transition-lift);
+}
+
+/* дырка в центре */
+.player__disc::after {
+  top: 50%;
+  left: 50%;
+  width: 10%;
+  height: 10%;
+  transform: translate(-50%, -50%);
+  background: var(--color-black);
+}
+
+/* CD: серебро с бликами */
+.player__disc[data-medium='cd']::before {
+  background:
+    radial-gradient(circle, var(--color-dark) 0 9%, var(--color-medium-cd-shine) 9% 13%, transparent 13%),
+    conic-gradient(
+      from 20deg,
+      var(--color-medium-cd) 0 18%,
+      var(--color-medium-cd-shine) 22%,
+      var(--color-medium-cd) 28% 62%,
+      var(--color-medium-cd-shine) 68%,
+      var(--color-medium-cd) 74% 100%
+    );
+}
+
+/* кассета (пока кругом): катушка с меткой */
+.player__disc[data-medium='cassette']::before {
+  background:
+    radial-gradient(circle, var(--color-dark) 0 14%, var(--color-medium-cassette-mark) 14% 22%, transparent 22%),
+    conic-gradient(var(--color-medium-cassette-mark) 0 6%, var(--color-medium-cassette) 6% 50%, var(--color-medium-cassette-mark) 50% 56%, var(--color-medium-cassette) 56%);
+}
+
+/* винил: бороздки и акцентная наклейка со штрихом */
+.player__disc[data-medium='vinyl']::before {
+  background:
+    linear-gradient(var(--color-dark), var(--color-dark)) center / 26% 4% no-repeat,
+    radial-gradient(circle, var(--color-accent) 0 30%, transparent 30%),
+    repeating-radial-gradient(circle, var(--color-medium-vinyl) 0 3px, var(--color-medium-vinyl-groove) 3px 4px);
+}
+
+.player__disc[data-spinning]::before {
+  animation-play-state: running;
+}
+
+.player__disc[data-loading]::before {
+  animation: player-wait 1s ease-in-out infinite alternate;
+}
+
+@keyframes player-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@keyframes player-wait {
+  to {
+    opacity: 0.5;
+  }
+}
+
+/* «что играет»: на всю высоту полосы, чтобы поп-ап начинался сразу под ней */
+.player__now {
+  position: relative;
+  display: flex;
+  justify-self: start;
+  align-items: center;
+  align-self: stretch;
+  gap: var(--player-pop-gap);
+}
+
+.player__now-label {
+  font-size: var(--fs-player-text);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+}
+
+.player__show,
+.player__pop-link {
+  border: var(--stroke-lift) solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: var(--color-black);
+  font: inherit;
+  font-weight: var(--fw-semibold);
+  line-height: 1.2;
+  cursor: pointer;
+  transition: transform var(--transition-lift), box-shadow var(--transition-lift), border-color var(--transition-lift);
+}
+
+.player__show {
+  padding: var(--player-show-padding);
+  font-size: var(--fs-player-text);
+}
+
+.player__show:focus-visible,
+.player__pop-link:focus-visible,
+.player__show[aria-expanded='true'] {
+  transform: translateY(var(--lift-hover-sm));
+  border-color: var(--color-black);
+  box-shadow: var(--shadow-lift-sm);
+  outline: none;
+}
+
+@media (hover: hover) {
+  .player__show:hover,
+  .player__pop-link:hover {
+    transform: translateY(var(--lift-hover-sm));
+    border-color: var(--color-black);
+    box-shadow: var(--shadow-lift-sm);
+  }
+}
+
+/* поп-ап в стиле подсказок каталога: голубой, «наклейка»; отступ сверху – мостик для курсора */
+.player__pop {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: var(--player-pop-width);
+  padding-top: var(--player-pop-gap);
+}
+
+.player__pop[hidden] {
+  display: none;
+}
+
+.player__pop-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(var(--player-pop-gap) * 0.75);
+  padding: var(--player-pop-padding);
+  border-radius: var(--radius-card-sm);
+  background: var(--color-info);
+  box-shadow: var(--shadow-sticker);
+  color: var(--color-dark);
+}
+
+.player__pop-title {
+  font-size: var(--fs-hint);
+  font-weight: var(--fw-bold);
+}
+
+.player__pop-cover {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: var(--stroke-panel) solid var(--color-black);
+  border-radius: var(--radius-card-sm);
+  background: var(--color-hero-glass);
+}
+
+.player__pop-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* нет обложки: кружок-пластинка */
+.player__pop-note {
+  width: 40%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--color-black) 0 12%, var(--color-accent) 12%);
+}
+
+.player__pop-track {
+  font-size: var(--fs-card-title);
+  font-weight: var(--fw-bold);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.player__pop-author,
+.player__pop-text {
+  font-size: var(--fs-card-text);
+  font-weight: var(--fw-medium);
+  line-height: 1.4;
+}
+
+.player__pop-link {
+  padding: var(--player-link-padding);
+  font-size: var(--fs-card-text);
+  text-decoration: none;
+}
+
+/* крестик нужен только на весь экран */
+.player__pop-close {
+  display: none;
+}
+
+/* скрытый iframe SoundCloud: не display: none, чтобы браузер не глушил звук */
+.player__engine {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.player__engine iframe {
+  width: 1px;
+  height: 1px;
+  border: 0;
+}
+
+/* телефон: полоса ниже, без подписи «что играет», блоки по краям */
+@media (max-width: 720px) {
+  /* размеры для телефона задаёт обёртка PlayerBar */
+  .player {
+    grid-template-columns: auto auto auto;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .player__modes {
+    justify-self: start;
+  }
+
+  .player__now {
+    justify-self: end;
+  }
+
+  .player__now-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .player__pop {
+    right: 0;
+    left: auto;
+  }
+}
+
+/* на таче поп-ап открывается тапом на весь экран, закрыть крестиком, тапом мимо или Esc */
+@media (hover: none), (pointer: coarse) {
+  .player__pop {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: grid;
+    align-items: center;
+    justify-items: center;
+    width: auto;
+    padding: var(--gutter);
+    background: var(--color-backdrop);
+  }
+
+  .player__pop-body {
+    width: min(100%, var(--player-pop-width));
+    max-height: 100%;
+    overflow-y: auto;
+  }
+
+  .player__pop-close {
+    position: absolute;
+    top: var(--player-pop-gap);
+    right: var(--player-pop-gap);
+    display: grid;
+    place-items: center;
+    width: var(--player-pop-close-size);
+    height: var(--player-pop-close-size);
+    padding: 0;
+    border: var(--stroke-panel) solid var(--color-black);
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+    color: var(--color-black);
+    cursor: pointer;
+  }
+
+  .player__pop-close svg {
+    width: 40%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.5px;
+    stroke-linecap: round;
+  }
+
+  .player__pop-title {
+    min-height: var(--player-pop-close-size);
+    display: flex;
+    align-items: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .player__socket,
+  .player__show,
+  .player__pop-link {
+    transition: none;
+  }
+
+  .player__disc::before,
+  .player__disc[data-loading]::before {
+    animation: none;
+  }
+
+  .player__mode:hover .player__socket,
+  .player__mode:focus-visible .player__socket,
+  .player__show:hover,
+  .player__show:focus-visible,
+  .player__show[aria-expanded='true'],
+  .player__pop-link:hover,
+  .player__pop-link:focus-visible {
+    transform: none;
+  }
+}
