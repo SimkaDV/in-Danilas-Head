@@ -3,7 +3,8 @@ import { Image } from 'astro:assets';
 import Layout from '@/layouts/Layout.astro';
 import Section from '@/components/layout/Section.astro';
 import Button from '@/components/ui/Button.astro';
-import { catalogCtaLabel, catalogFilters, modelBackLabel, modelImageKinds, modelSpecsTitle } from '@/data/catalog';
+import { catalogCtaLabel, catalogFilters, modelBackLabel, modelImageKinds, modelOrderMessage, modelSpecsTitle } from '@/data/catalog';
+import { telegramLink } from '@/data/contacts';
 import { getApprovedModels } from '@/data/models';
 
 // страница генерируется для каждой approved-модели, адрес = имя папки
@@ -17,6 +18,7 @@ const { title, summary, description, category, price, images, specs } = model.da
 const categoryLabel = catalogFilters.find((filter) => filter.id === category)?.label;
 const paragraphs = (description ?? summary).split(/\n\s*\n/);
 const [cover, ...rest] = images;
+const orderMessage = modelOrderMessage(title);
 ---
 <Layout title={`${title} — В голове у Даньки`} description={summary}>
   <Section>
@@ -75,14 +77,26 @@ const [cover, ...rest] = images;
 
           <div class="model__order">
             {price && <span class="model__price">{price}</span>}
-            <!-- куда ведёт заказ, пока не решено -->
-            <Button href="#" arrow>{catalogCtaLabel}</Button>
+            <!-- адрес страницы дописывает скрипт ниже, без JS уйдёт сообщение без ссылки -->
+            <Button href={telegramLink(orderMessage)} target="_blank" rel="noopener" data-order-message={orderMessage} arrow>
+              {catalogCtaLabel}
+            </Button>
           </div>
         </div>
       </div>
     </div>
   </Section>
 </Layout>
+
+<script>
+  import { telegramLink } from '@/data/contacts';
+
+  // домена пока нет, поэтому адрес модели берём из текущей страницы
+  document.querySelectorAll<HTMLAnchorElement>('[data-order-message]').forEach((link) => {
+    const url = location.origin + location.pathname;
+    link.href = telegramLink(`${link.dataset.orderMessage}\n${url}`);
+  });
+</script>
 
 <style>
   .model {

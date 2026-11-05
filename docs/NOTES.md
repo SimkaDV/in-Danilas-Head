@@ -10,7 +10,7 @@
 - src/components/layout — каркас (`Container`, `Section`, `Footer`); шапки (Header) пока нет
 - src/components/sections — блоки страниц (`Hero`, `Flagship`, `About`, `Catalog`)
 - src/components/islands — React-острова (`CaseTabs`, `CatalogFilter`)
-- src/data — тексты и данные без разметки (`hero.ts`, `flagship.ts`, `about.ts`, `interests.json`, `catalog.ts`, `models.ts`)
+- src/data — тексты и данные без разметки (`hero.ts`, `flagship.ts`, `about.ts`, `interests.json`, `catalog.ts`, `models.ts`, `contacts.ts`)
 - src/content/models — модели каталога, по папке на модель
 - src/assets — картинки, которые обрабатывает Astro (`head.webp`, `flagship-case.png`, `bg-grid.png`)
 - src/styles — tokens.css (все переменные) и global.css
@@ -40,7 +40,7 @@
 - Табы вариантов — React-остров `src/components/islands/CaseTabs.tsx` (`client:visible`): показывает элемент с `data-case-variant` активного варианта.
 - Рендер кейса `src/assets/flagship-case.png`, пока один на все варианты.
 - Цвета подогнаны под палитру: клякса и активный таб `--color-accent`, карточки `--color-deep`.
-- Кнопка пока ведёт на `#`, цены нет.
+- Кнопка «Собрать кейс» ведёт в личку Telegram с готовым текстом (в новой вкладке). Позже поведёт на страницу коллекции. Цены нет.
 
 ## Catalog (каталог моделей)
 - Секция `src/components/sections/Catalog.astro`, якорь `#catalog`.
@@ -51,12 +51,15 @@
 - `images` — список `{ src, kind, alt }`: `src` путь от `model.json` (`./01-render.png`), `kind` — `render` или `photo`. Первое фото — обложка карточки и большое фото на странице, остальные сеткой под ним. Без фото рисуется кубик.
 - Шаблон новой модели — `src/content/models/_template/model.json` (папки с `_` не читаются). Скопировать папку, переименовать, заполнить, поставить `approved`.
 - Сейчас шесть заглушек `calendar-1…6` без фото.
-- Страница модели `src/pages/catalog/[slug].astro`: назад в каталог, галерея с метками «Рендер»/«Фото», описание, характеристики, цена, кнопка «Хочу такую» (пока на `#`).
+- Страница модели `src/pages/catalog/[slug].astro`: назад в каталог, галерея с метками «Рендер»/«Фото», описание, характеристики, цена, кнопка «Хочу такую»: открывает личку Telegram в новой вкладке с текстом `modelOrderMessage(title)` из `catalog.ts` и адресом страницы. Адрес дописывает скрипт на странице из `location`, потому что домена пока нет. Без JS сообщение уходит без ссылки.
 - Сцена конвейера — панель в стиле Hero с картинкой `src/assets/catalog-conveyor.png` (прозрачный фон, обрезана по низу, стоит на дне панели, 80% ширины). Позже заменится анимацией.
 - Две подсказки (`--color-info`, тёмный текст, обводка-«наклейка» `--shadow-sticker`) стопкой справа поверх панели, вторая сдвинута правее; на мобилке встают под панель. В подсказке про принтер фото `src/assets/catalog-printer.jpg`: это кнопка со значком «развернуть» в углу, по нажатию фото открывается крупно в `<dialog>` (закрыть крестиком, Esc или тапом мимо фото), окно по размеру фото. На мобилке фото занимает 40% подсказки.
 - Карточка `src/components/ui/ModelCard.astro`: фото (проп `image`, без него рисуется кубик-заглушка), название, описание, цена и кнопка. Ховер: подъём, чёрная обводка и тень, кнопка становится `--color-accent`.
 - На мобилке (≤720px) сетка в две колонки, карточка плотнее: меньше паддинги, шрифты `--fs-card-*-compact`, цена над кнопкой, кнопка во всю ширину.
 - Фильтр — React-остров `src/components/islands/CatalogFilter.tsx` (`client:visible`), прячет карточки по `data-catalog-category`; использует стили таблеток из `CaseTabs.css`.
+
+## Telegram
+- Ник и функция `telegramLink(text)` в `src/data/contacts.ts`. Ссылка `t.me/<ник>?text=...` открывает личку с уже набранным сообщением. Ник публичный, он всё равно виден в ссылке, поэтому лежит прямо в коде, а не в `.env`.
 
 ## Ховер кнопок
 - `Button`, карточка модели и карточки-ссылки интересов — полный подъём (`--lift-hover`, `--shadow-lift`).

@@ -22,6 +22,9 @@ export const catalogFilters = [
 // сами модели лежат в src/content/models, см. коллекцию models в content.config.ts
 export const catalogCtaLabel = 'Хочу такую';
 
+// сообщение в личку со страницы модели, позже сюда добавятся выбранные параметры
+export const modelOrderMessage = (title: string) => `Привет, хочу такую модель: ${title}`;
+
 // страница модели
 export const modelBackLabel = 'Назад в каталог';
 export const modelSpecsTitle = 'Характеристики';
