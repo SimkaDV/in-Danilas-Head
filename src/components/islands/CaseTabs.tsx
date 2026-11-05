@@ -30,6 +30,7 @@ export default function CaseTabs({ label, variants }: Props) {
           key={variant.id}
           type="button"
           className="case-tabs__pill"
+          data-scroll-lift
           aria-pressed={variant.id === active}
           onClick={() => setActive(variant.id)}
         >

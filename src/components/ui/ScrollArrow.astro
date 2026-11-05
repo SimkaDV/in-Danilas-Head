@@ -17,11 +17,12 @@ const { href } = Astro.props;
     --arrow-stroke-width: 3px;
     --arrow-focus-width: 2px;
     --arrow-focus-offset: 3px;
+    --arrow-pulse-duration: 2s;
 
     display: block;
     width: var(--arrow-width);
     color: var(--color-black);
-    transition: transform var(--transition-lift), filter var(--transition-lift);
+    animation: scroll-arrow-pulse var(--arrow-pulse-duration) ease-in-out infinite;
   }
 
   .scroll-arrow svg {
@@ -34,12 +35,31 @@ const { href } = Astro.props;
     stroke-linejoin: round;
   }
 
-  /* у стрелки нет плашки, поэтому вместо обводки и тени-коробки — тень самой линии */
-  .scroll-arrow:hover,
+  /* стрелка сама по кругу загорается и поднимается, как на ховере;
+     у неё нет плашки, поэтому вместо обводки и тени-коробки — тень самой линии */
+  @keyframes scroll-arrow-pulse {
+    50% {
+      color: var(--color-accent);
+      transform: translateY(var(--lift-hover-sm));
+      filter: drop-shadow(var(--shadow-lift-sm));
+    }
+  }
+
+  /* на ховере и фокусе держится поднятой */
   .scroll-arrow:focus-visible {
+    animation: none;
     color: var(--color-accent);
     transform: translateY(var(--lift-hover-sm));
     filter: drop-shadow(var(--shadow-lift-sm));
+  }
+
+  @media (hover: hover) {
+    .scroll-arrow:hover {
+      animation: none;
+      color: var(--color-accent);
+      transform: translateY(var(--lift-hover-sm));
+      filter: drop-shadow(var(--shadow-lift-sm));
+    }
   }
 
   .scroll-arrow:focus-visible {
@@ -49,7 +69,7 @@ const { href } = Astro.props;
 
   @media (prefers-reduced-motion: reduce) {
     .scroll-arrow {
-      transition: none;
+      animation: none;
     }
 
     .scroll-arrow:hover,

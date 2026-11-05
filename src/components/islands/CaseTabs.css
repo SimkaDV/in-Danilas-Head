@@ -23,21 +23,34 @@
   transition: transform var(--transition-lift), box-shadow var(--transition-lift), border-color var(--transition-lift);
 }
 
-.case-tabs__pill:hover {
+.case-tabs__pill[data-lifted] {
   background: var(--color-hero-glass);
   color: var(--color-text-inverse);
 }
 
-.case-tabs__pill:hover,
-.case-tabs__pill:focus-visible {
+/* поднята: наведение, фокус или прокрутка (data-lifted ставит scroll-lift.ts) — одно состояние */
+.case-tabs__pill:focus-visible,
+.case-tabs__pill[data-lifted] {
   transform: translateY(var(--lift-hover-sm));
   border-color: var(--color-black);
   box-shadow: var(--shadow-lift-sm);
   outline: none;
 }
 
+/* на таче :hover залипает после тапа, поэтому ховер только для мыши */
+@media (hover: hover) {
+  .case-tabs__pill:hover {
+    background: var(--color-hero-glass);
+    color: var(--color-text-inverse);
+    transform: translateY(var(--lift-hover-sm));
+    border-color: var(--color-black);
+    box-shadow: var(--shadow-lift-sm);
+  }
+}
+
 /* активная таблетка «нажата»: стоит на месте без тени, ховер её не поднимает */
-.case-tabs__pill[aria-pressed='true'] {
+.case-tabs__pill[aria-pressed='true'],
+.case-tabs__pill[aria-pressed='true']:hover {
   border-color: var(--color-black);
   background: var(--color-accent);
   color: var(--color-black);
@@ -57,7 +70,8 @@
   }
 
   .case-tabs__pill:hover,
-  .case-tabs__pill:focus-visible {
+  .case-tabs__pill:focus-visible,
+  .case-tabs__pill[data-lifted] {
     transform: none;
   }
 }

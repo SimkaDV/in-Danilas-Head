@@ -40,6 +40,7 @@
   --shadow-lift: 6px 6px 0 var(--color-black);
   --shadow-lift-sm: 3px 3px 0 var(--color-black);
   --transition-lift: 0.2s ease;
+  --lift-stagger: 0.12s; /* шаг, с которым ряд кнопок поднимается прокруткой по очереди */
 
   /* about: бенто-сетка интересов, theme карточки → цвет */
   --color-interest-olive: #7A9371;

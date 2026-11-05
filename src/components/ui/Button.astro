@@ -10,7 +10,7 @@ type Props = HTMLAttributes<'a'> & HTMLAttributes<'button'> & {
 const { href, arrow = false, class: className, ...rest } = Astro.props;
 const Tag = href ? 'a' : 'button';
 ---
-<Tag class:list={['button', className]} href={href} type={href ? undefined : 'button'} {...rest}>
+<Tag class:list={['button', className]} href={href} type={href ? undefined : 'button'} data-scroll-lift {...rest}>
   <slot />
   {arrow && (
     <svg class="button__arrow" viewBox="0 0 10 16" aria-hidden="true">
@@ -59,13 +59,24 @@ const Tag = href ? 'a' : 'button';
     stroke-linejoin: round;
   }
 
-  .button:hover,
-  .button:focus-visible {
+  /* поднята: наведение, фокус или прокрутка (data-lifted ставит scroll-lift.ts) — одно состояние */
+  .button:focus-visible,
+  .button[data-lifted] {
     background: var(--color-accent);
     transform: translateY(var(--lift-hover));
     border-color: var(--color-black);
     box-shadow: var(--shadow-lift);
     outline: none;
+  }
+
+  /* на таче :hover залипает после тапа, поэтому ховер только для мыши */
+  @media (hover: hover) {
+    .button:hover {
+      background: var(--color-accent);
+      transform: translateY(var(--lift-hover));
+      border-color: var(--color-black);
+      box-shadow: var(--shadow-lift);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -74,7 +85,8 @@ const Tag = href ? 'a' : 'button';
     }
 
     .button:hover,
-    .button:focus-visible {
+    .button:focus-visible,
+    .button[data-lifted] {
       transform: none;
     }
   }

@@ -180,12 +180,20 @@ const Tag = href ? 'a' : 'div';
     stroke-linejoin: round;
   }
 
-  a.interest:hover,
   a.interest:focus-visible {
     transform: translateY(var(--lift-hover));
     border-color: var(--color-black);
     box-shadow: var(--shadow-lift);
     outline: none;
+  }
+
+  /* на таче :hover залипает после тапа, поэтому ховер только для мыши */
+  @media (hover: hover) {
+    a.interest:hover {
+      transform: translateY(var(--lift-hover));
+      border-color: var(--color-black);
+      box-shadow: var(--shadow-lift);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

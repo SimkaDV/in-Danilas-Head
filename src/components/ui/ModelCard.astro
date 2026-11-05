@@ -31,7 +31,7 @@ const { title, text, category, href, price, ctaLabel, image } = Astro.props;
   </div>
   <div class="model-card__footer">
     {price && <span class="model-card__price">{price}</span>}
-    <a class="model-card__cta" href={href}>
+    <a class="model-card__cta" href={href} data-scroll-lift>
       {ctaLabel}
       <svg viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" /></svg>
     </a>
@@ -63,7 +63,6 @@ const { title, text, category, href, price, ctaLabel, image } = Astro.props;
     display: none;
   }
 
-  .model-card:hover,
   .model-card:focus-within {
     transform: translateY(var(--lift-hover));
     border-color: var(--color-black);
@@ -86,9 +85,6 @@ const { title, text, category, href, price, ctaLabel, image } = Astro.props;
     transition: transform var(--transition-lift);
   }
 
-  .model-card:hover .model-card__image {
-    transform: scale(1.05);
-  }
 
   .model-card__placeholder {
     width: var(--placeholder-size);
@@ -156,18 +152,37 @@ const { title, text, category, href, price, ctaLabel, image } = Astro.props;
     stroke-linejoin: round;
   }
 
-  .model-card:hover .model-card__cta,
-  .model-card__cta:hover {
+  /* CTA поднимается чуть-чуть и только от своего ховера, фокуса или прокрутки (data-lifted ставит scroll-lift.ts) */
+  .model-card__cta:focus-visible,
+  .model-card__cta[data-lifted] {
     background: var(--color-accent);
-  }
-
-  /* карточка уже поднята, поэтому CTA поднимается чуть-чуть и только от своего ховера */
-  .model-card__cta:hover,
-  .model-card__cta:focus-visible {
     transform: translateY(var(--lift-hover-sm));
     border-color: var(--color-black);
     box-shadow: var(--shadow-lift-sm);
     outline: none;
+  }
+
+  /* на таче :hover залипает после тапа, поэтому ховер только для мыши */
+  @media (hover: hover) {
+    .model-card:hover {
+      transform: translateY(var(--lift-hover));
+      border-color: var(--color-black);
+      box-shadow: var(--shadow-lift);
+    }
+
+    .model-card:hover .model-card__image {
+      transform: scale(1.05);
+    }
+
+    .model-card:hover .model-card__cta {
+      background: var(--color-accent);
+    }
+
+    .model-card__cta:hover {
+      transform: translateY(var(--lift-hover-sm));
+      border-color: var(--color-black);
+      box-shadow: var(--shadow-lift-sm);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -180,7 +195,8 @@ const { title, text, category, href, price, ctaLabel, image } = Astro.props;
     .model-card:hover,
     .model-card:focus-within,
     .model-card__cta:hover,
-    .model-card__cta:focus-visible {
+    .model-card__cta:focus-visible,
+    .model-card__cta[data-lifted] {
       transform: none;
     }
   }

@@ -32,6 +32,7 @@ export default function CatalogFilter({ label, filters }: Props) {
           key={filter.id}
           type="button"
           className="case-tabs__pill"
+          data-scroll-lift
           aria-pressed={filter.id === active}
           onClick={() => setActive(filter.id)}
         >
