@@ -13,11 +13,11 @@ import { heroLinks, heroNextHref, heroTitle } from '@/data/hero';
       <div class="hero__head" role="img" aria-label="Голова Даньки">
         <Image src={head} alt="" width={347} densities={[2, 3]} loading="eager" />
       </div>
-      <nav class="hero__links" aria-label="Быстрый переход">
-        {heroLinks.map((link) => <Button href={link.href}>{link.label}</Button>)}
-      </nav>
     </div>
   </div>
+  <nav class="hero__links" aria-label="Быстрый переход">
+    {heroLinks.map((link) => <Button href={link.href}>{link.label}</Button>)}
+  </nav>
   <ScrollArrow href={heroNextHref} />
 </section>
 
@@ -27,7 +27,9 @@ import { heroLinks, heroNextHref, heroTitle } from '@/data/hero';
     --hero-top-space: clamp(24px, 2.2vw, 32px);
     --hero-title-gap: clamp(24px, 3vw, 40px);
     --hero-stage-gap: clamp(12px, 1.2vw, 16px);
-    --hero-link-offset: clamp(16px, 6vw, 75px);
+    --hero-links-gap: clamp(20px, 2.4vw, 32px);
+    /* ряд кнопок не тянется на всю ширину: ~60% экрана, но не уже, чем влезают подписи */
+    --hero-links-width: clamp(600px, 60%, 860px);
     --hero-arrow-gap: 24px;
     --hero-glass-blur: 1px;
     --hero-title-shadow: 3px 3px 0 var(--color-black);
@@ -78,14 +80,14 @@ import { heroLinks, heroNextHref, heroTitle } from '@/data/hero';
 
   .hero__links {
     display: flex;
-    grid-column: 3;
-    flex-direction: column;
-    align-self: center;
+    width: min(100%, var(--hero-links-width));
     gap: var(--hero-stage-gap);
-    margin-inline-start: var(--hero-link-offset);
+    margin: var(--hero-links-gap) auto 0;
   }
 
-  .hero__links :global(a) {
+  .hero__links :global(.button) {
+    flex: 1 1 auto;
+    width: auto;
     white-space: nowrap;
   }
 
@@ -118,15 +120,13 @@ import { heroLinks, heroNextHref, heroTitle } from '@/data/hero';
       grid-column: 1;
     }
 
+    /* на узком экране кнопки друг под другом, каждая во всю ширину */
     .hero__links {
-      grid-column: 1;
-      width: min(100%, 320px);
-      align-items: stretch;
-      margin-inline-start: 0;
+      flex-direction: column;
     }
 
-    .hero__links :global(a) {
-      white-space: normal;
+    .hero__links :global(.button) {
+      width: 100%;
     }
   }
 </style>
