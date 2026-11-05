@@ -45,6 +45,13 @@
   --transition-lift: 0.2s ease;
   --lift-stagger: 0.12s; /* шаг, с которым ряд кнопок поднимается прокруткой по очереди */
 
+  /* волна карточек каталога: выезжают до состояния ховера и опускаются, уходят быстрее */
+  --wave-duration: 0.6s;
+  --wave-out-duration: 0.22s;
+  --wave-step: 0.08s;
+  --wave-out-step: 0.03s;
+  --wave-offset: 32px; /* откуда выезжает карточка и куда уезжает */
+
   /* about: бенто-сетка интересов, theme карточки → цвет */
   --color-interest-olive: #7A9371;
   --color-interest-sage: #719381;

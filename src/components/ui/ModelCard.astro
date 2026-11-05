@@ -63,6 +63,47 @@ const { title, text, category, href, price, ctaLabel, image } = Astro.props;
     display: none;
   }
 
+  /* волна: data-wave ставит catalog-wave.ts, --wave-i – место карточки в очереди */
+  .model-card[data-wave='pending'] {
+    opacity: 0;
+  }
+
+  .model-card[data-wave='in'] {
+    animation: model-card-wave-in var(--wave-duration) ease-out backwards;
+    animation-delay: calc(var(--wave-i, 0) * var(--wave-step));
+  }
+
+  .model-card[data-wave='out'] {
+    animation: model-card-wave-out var(--wave-out-duration) ease-in forwards;
+    animation-delay: calc(var(--wave-i, 0) * var(--wave-out-step));
+  }
+
+  /* выезжает снизу, на пике – состояние ховера, потом опускается на место */
+  @keyframes model-card-wave-in {
+    0% {
+      opacity: 0;
+      transform: translateY(var(--wave-offset));
+    }
+
+    55% {
+      opacity: 1;
+      transform: translateY(var(--lift-hover));
+      border-color: var(--color-black);
+      box-shadow: var(--shadow-lift);
+    }
+
+    100% {
+      transform: none;
+    }
+  }
+
+  @keyframes model-card-wave-out {
+    to {
+      opacity: 0;
+      transform: translateY(var(--wave-offset));
+    }
+  }
+
   .model-card:focus-within {
     transform: translateY(var(--lift-hover));
     border-color: var(--color-black);

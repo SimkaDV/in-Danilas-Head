@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { waveFilter } from '@/scripts/catalog-wave';
 import './CaseTabs.css';
 
 interface Filter {
@@ -17,12 +18,16 @@ const ALL = 'all';
 export default function CatalogFilter({ label, filters }: Props) {
   const [active, setActive] = useState(filters[0]?.id ?? ALL);
   const root = useRef<HTMLDivElement>(null);
+  const firstRun = useRef(true);
 
   useEffect(() => {
+    // при загрузке видны все, волну первого появления запускает Catalog.astro
+    if (firstRun.current) {
+      firstRun.current = false;
+      return;
+    }
     const section = root.current?.closest('[data-catalog]');
-    section?.querySelectorAll<HTMLElement>('[data-catalog-category]').forEach((el) => {
-      el.hidden = active !== ALL && el.dataset.catalogCategory !== active;
-    });
+    if (section) waveFilter(section, (el) => active === ALL || el.dataset.catalogCategory === active);
   }, [active]);
 
   return (

@@ -74,7 +74,7 @@ const models = await getApprovedModels();
 
     <CatalogFilter client:visible label={catalogFiltersLabel} filters={catalogFilters} />
 
-    <div class="catalog__grid">
+    <div class="catalog__grid" data-catalog-grid>
       {models.map(({ id, data }) => (
         <ModelCard
           title={data.title}
@@ -348,6 +348,12 @@ const models = await getApprovedModels();
 </style>
 
 <script>
+  import { waveOnView } from '@/scripts/catalog-wave';
+
+  // карточки выезжают волной, когда сетка доезжает до экрана
+  const grid = document.querySelector<HTMLElement>('[data-catalog-grid]');
+  if (grid) waveOnView(grid);
+
   // фото принтера открывается крупно в <dialog>; закрыть – крестиком, Esc или тапом мимо фото
   const dialog = document.querySelector<HTMLDialogElement>('[data-zoom-dialog]');
   const open = document.querySelector<HTMLButtonElement>('[data-zoom-open]');
