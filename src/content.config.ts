@@ -2,6 +2,7 @@ import { defineCollection } from 'astro:content';
 import { file, glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { catalogFilters } from './data/catalog';
+import { plastics } from './data/plastics';
 
 // карточки бенто-сетки «О себе», порядок в файле = порядок в сетке
 const interests = defineCollection({
@@ -27,6 +28,8 @@ const interests = defineCollection({
 // имя папки (латиница через дефис) = адрес страницы /catalog/<slug>/,
 // папки с _ в начале не читаются (там шаблон)
 const categoryIds = catalogFilters.map((filter) => filter.id).filter((id) => id !== 'all') as [string, ...string[]];
+
+const plasticIds = plastics.map((plastic) => plastic.id) as [string, ...string[]];
 
 const models = defineCollection({
   loader: glob({
@@ -60,6 +63,19 @@ const models = defineCollection({
         .default([]),
       // характеристики на странице: материал, размер, время печати…
       specs: z.array(z.object({ label: z.string(), value: z.string() })).default([]),
+      // цвета: id пластиков из src/data/plastics.ts, первый выбран сразу
+      colors: z.array(z.enum(plasticIds)).default([]),
+      // комплектации: выбирается одна, первая базовая и выбрана сразу; цена комплектации заменяет price
+      kits: z
+        .array(
+          z.object({
+            title: z.string(),
+            price: z.string(),
+            description: z.string().optional(),
+            image: image().optional(),
+          }),
+        )
+        .default([]),
     }),
 });
 

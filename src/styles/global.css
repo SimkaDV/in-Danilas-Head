@@ -30,3 +30,37 @@ body {
 main { flex: 1; }
 
 img, svg, video { display: block; max-width: 100%; }
+
+/* скроллбар в стиле сайта, только с мышью: на таче остаётся системный */
+@media (hover: hover) and (pointer: fine) {
+  ::-webkit-scrollbar {
+    width: var(--scrollbar-size);
+    height: var(--scrollbar-size);
+  }
+
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: var(--color-scrollbar-track);
+  }
+
+  ::-webkit-scrollbar-track {
+    border-radius: var(--radius-pill);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border: var(--scrollbar-stroke) solid var(--color-black);
+    border-radius: var(--radius-pill);
+    background: var(--color-scrollbar-thumb);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-scrollbar-thumb-hover);
+  }
+
+  /* Firefox не знает ::-webkit-scrollbar, ему только цвета; в Chrome scrollbar-color перебил бы стили выше */
+  @supports not selector(::-webkit-scrollbar) {
+    * {
+      scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
+    }
+  }
+}

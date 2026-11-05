@@ -52,6 +52,13 @@
   --wave-out-step: 0.03s;
   --wave-offset: 32px; /* откуда выезжает карточка и куда уезжает */
 
+  /* скроллбар в стиле сайта (десктоп): акцентный ползунок с чёрной обводкой на тёмной дорожке */
+  --scrollbar-size: 14px;
+  --scrollbar-stroke: 2px;
+  --color-scrollbar-track: var(--color-dark);
+  --color-scrollbar-thumb: var(--color-button);
+  --color-scrollbar-thumb-hover: var(--color-accent);
+
   /* about: бенто-сетка интересов, theme карточки → цвет */
   --color-interest-olive: #7A9371;
   --color-interest-sage: #719381;
