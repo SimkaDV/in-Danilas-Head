@@ -9,13 +9,11 @@ import { playerStyles, playerText } from '@/data/player';
 
 <style>
   .player-bar {
-    /* носитель вылезает за полосу, сверху под него оставляем место */
-    --player-bar-top: calc((var(--player-disc-size) - var(--player-height)) / 2 + 6px);
-
     position: sticky;
     top: 0;
     z-index: 5;
-    padding: var(--player-bar-top) var(--gutter) 0;
+    /* полоса прижата к верху экрана, верх носителя уходит за край */
+    padding: 0 var(--gutter);
     /* поля вокруг полосы пропускают клики к странице */
     pointer-events: none;
   }
