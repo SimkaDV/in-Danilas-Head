@@ -59,6 +59,29 @@
   --color-scrollbar-thumb: var(--color-button);
   --color-scrollbar-thumb-hover: var(--color-accent);
 
+  /* плеер: липкая полоса сверху, носитель по центру вылезает за неё */
+  --player-height: 66px;
+  --player-radius: 16px;
+  --player-disc-size: 110px;
+  --player-disc-ring: 8px;
+  --player-button-size: 30px;
+  --player-dot-size: 12px;
+  --player-gap: clamp(16px, 7vw, 100px); /* между кнопками, носителем и «что играет» */
+  --player-button-gap: clamp(14px, 3.2vw, 46px);
+  --fs-player-label: 13px;
+  --fs-player-text: 16px;
+  --color-player-dot: #6E8209; /* огонёк выключенной кнопки, тусклый акцент */
+  --shadow-player-glow: 0 0 8px var(--color-accent);
+  --shadow-player-socket: inset 2px 2px 4px var(--color-black);
+  --player-spin: 3s; /* один оборот носителя */
+  /* заглушки носителей: цвет и полоска-метка, по которой видно вращение */
+  --color-medium-cd: #C9D6DF;
+  --color-medium-cd-shine: #F4F8FB;
+  --color-medium-cassette: #E08A3C;
+  --color-medium-cassette-mark: #F7D9A8;
+  --color-medium-vinyl: #151713;
+  --color-medium-vinyl-groove: #3A3F35;
+
   /* about: бенто-сетка интересов, theme карточки → цвет */
   --color-interest-olive: #7A9371;
   --color-interest-sage: #719381;

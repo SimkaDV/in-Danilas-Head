@@ -2,6 +2,7 @@
 import '@fontsource-variable/rubik';
 import '@/styles/global.css';
 import Footer from '@/components/layout/Footer.astro';
+import PlayerBar from '@/components/layout/PlayerBar.astro';
 
 const { title = 'В голове у Даньки', description = '' } = Astro.props;
 ---
@@ -15,6 +16,7 @@ const { title = 'В голове у Даньки', description = '' } = Astro.pr
     <title>{title}</title>
   </head>
   <body>
+    <PlayerBar />
     <main><slot /></main>
     <Footer />
     <script>

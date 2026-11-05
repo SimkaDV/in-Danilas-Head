@@ -7,10 +7,10 @@
 - src/pages – страницы: главная `index.astro` и шаблон страницы модели `catalog/[slug].astro`
 - src/layouts – `Layout.astro`: `<html>`, мета, фон-сетка, футер
 - src/components/ui – мелкие кирпичики (`Button`, `ScrollArrow`, `FeatureCard`, `InterestCard`, `ModelCard`)
-- src/components/layout – каркас (`Container`, `Section`, `Footer`); шапки (Header) пока нет
+- src/components/layout – каркас (`Container`, `Section`, `Footer`, `PlayerBar`); шапки (Header) пока нет
 - src/components/sections – блоки страниц (`Hero`, `Flagship`, `About`, `Catalog`)
-- src/components/islands – React-острова (`CaseTabs`, `CatalogFilter`)
-- src/data – тексты и данные без разметки (`hero.ts`, `flagship.ts`, `about.ts`, `interests.json`, `footer.ts`, `catalog.ts`, `models.ts`, `plastics.ts`, `contacts.ts`)
+- src/components/islands – React-острова (`CaseTabs`, `CatalogFilter`, `Player`)
+- src/data – тексты и данные без разметки (`hero.ts`, `flagship.ts`, `about.ts`, `interests.json`, `footer.ts`, `player.ts`, `catalog.ts`, `models.ts`, `plastics.ts`, `contacts.ts`)
 - src/content/models – модели каталога, по папке на модель
 - src/assets – картинки, которые обрабатывает Astro (`head.webp`, `flagship-case.png`, `bg-grid.png`)
 - src/styles – tokens.css (все переменные) и global.css
@@ -100,6 +100,16 @@
 - Слева название и круглые кнопки соцсетей (Telegram, Instagram; пока на `#`) с маленьким подъёмом `-sm`.
 - Три колонки: «Навигация» (Главная + якоря из `heroLinks` с `/` впереди, чтобы работали со страницы модели), «Интересы» (из `interests.json` без intro; ссылкой только те, у кого есть `href`, остальные бледные), «Проект» (Команда и Политика конфиденциальности, пока на `#`).
 - Снизу ©-строка. На мобилке (≤720px) название и соцсети сверху, колонки ссылок в две.
+
+## Плеер
+- Липкая полоса сверху над всеми блоками, на всех страницах: `src/components/layout/PlayerBar.astro` (подключён в `Layout.astro`, `position: sticky`), внутри React-остров `src/components/islands/Player.tsx` + `Player.css` (`client:load`).
+- Полоса сплошная `--color-dark` (стекло пробовали, не понравилось). Прижата к самому верху экрана: верх носителя уходит за край, Hero начинается сразу под полосой.
+- Стили, носители, ссылки на плейлисты и все подписи в `src/data/player.ts`. Плейлисты: Techno – «Фон электро» (`fon-elektro`), LoFi – «Идеальный фон» (`idealnyj-fon`), Jazz – «Фон джаз / интструментал», он пока закрытый. Закрытый плейлист виджет берёт только в виде `api.soundcloud.com/playlists/<номер>?secret_token=s-…` (номер и ключ – из кода встраивания SoundCloud), обычная ссылка с `/s-…` не работает.
+- Слева кнопки Pause / Techno / LoFi / Jazz: гнездо с огоньком, включённая «нажата» (огонёк горит, `aria-pressed`). По центру носитель вылезает за полосу: до первого запуска акцентный круг, дальше заглушка стиля (Techno – CD, LoFi – кассета, Jazz – винил, пока кругами с меткой), крутится, пока играет, на паузе замирает на месте. Справа «What's playing?» и «Show».
+- Поп-ап «Сейчас играет» в стиле подсказок каталога (`--color-info`, `--shadow-sticker`): обложка, название, автор, «Слушать на SoundCloud». С мышью открыт, пока курсор или фокус в блоке, на таче тап открывает его на весь экран (крестик, тап мимо, Esc). До запуска в нём подсказка выбрать стиль.
+- Звук – SoundCloud Widget API (`src/scripts/soundcloud.ts`): скрытый iframe, скрипт и iframe грузятся только по первому нажатию на стиль. Тот же плейлист продолжает играть с места, другой грузится заново. Плейлист кончился – начинается сначала. Если плейлист не заиграл за 12 с (закрыт, удалён, нет сети), плеер встаёт на паузу и пишет в поп-апе, что SoundCloud не загрузился. Плейлисты лучше делать открытыми, закрытый работает только по номеру с секретным ключом (см. Jazz).
+- Размеры в токенах `--player-*`, на телефоне (≤720px) их уменьшает `PlayerBar`, подпись «What's playing?» прячется. Под `prefers-reduced-motion` носитель не крутится.
+- Пока музыка обрывается при переходе на другую страницу: дальше `ClientRouter` + `transition:persist` и перезапуск наших скриптов на `astro:page-load`. Не проверено на iPhone.
 
 ## Главная сейчас
 Порядок на `src/pages/index.astro`: Hero → Flagship (`#collection`) → About (`#about`) → Catalog (`#catalog`) → футер.
