@@ -54,7 +54,6 @@ const { title, text, shape = 'a', icon } = Astro.props;
 
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
     gap: var(--card-gap);
     padding: var(--card-padding);
     background: var(--color-deep);
@@ -68,10 +67,12 @@ const { title, text, shape = 'a', icon } = Astro.props;
     min-width: 0;
   }
 
-  /* картинка с той стороны, куда выровнен текст: слева, справа, слева; на десктопе над текстом, в одну колонку сбоку */
+  /* картинка напротив текста: у a и c после текста справа, у b перед текстом слева; на десктопе под/над текстом, в одну колонку сбоку */
   .feature-card__art {
     display: grid;
     flex: none;
+    order: 1;
+    align-self: flex-end;
     place-items: center;
     width: var(--card-art-size);
     aspect-ratio: 1;
@@ -91,8 +92,12 @@ const { title, text, shape = 'a', icon } = Astro.props;
     border-radius: var(--radius-card-sm) var(--radius-card-lg) var(--radius-card-sm) var(--radius-card-lg);
   }
 
+  .feature-card--b .feature-card__art {
+    order: 0;
+    align-self: flex-start;
+  }
+
   .feature-card--b {
-    align-items: flex-end;
     border-radius: var(--radius-card-lg) var(--radius-card-sm) var(--radius-card-lg) var(--radius-card-sm);
     text-align: end;
   }
@@ -119,8 +124,9 @@ const { title, text, shape = 'a', icon } = Astro.props;
       align-items: center;
     }
 
-    .feature-card--b {
-      flex-direction: row-reverse;
+    .feature-card__art,
+    .feature-card--b .feature-card__art {
+      align-self: auto;
     }
 
     .feature-card__body {
