@@ -9,12 +9,20 @@ import {
   catalogFilters,
   modelAboutTitle,
   modelBackLabel,
+  modelColorsTitle,
   modelImageKinds,
+  modelKitsTitle,
   modelMoreTitle,
+  modelOrderColorLabel,
+  modelOrderKitLabel,
+  modelOrderMessage,
   modelPhotoPickLabel,
+  modelPopupCloseLabel,
   modelSpecsTitle,
 } from '@/data/catalog';
+import { telegramLink } from '@/data/contacts';
 import { getApprovedModels, modelHref } from '@/data/models';
+import { plastics } from '@/data/plastics';
 
 // страница генерируется для каждой approved-модели, адрес = имя папки
 export async function getStaticPaths() {
@@ -23,7 +31,19 @@ export async function getStaticPaths() {
 }
 
 const { model } = Astro.props;
-const { title, summary, description, category, price, images, specs } = model.data;
+const { title, summary, description, category, price, images, specs, colors, kits } = model.data;
+const modelPlastics = colors.flatMap((id) => plastics.filter((plastic) => plastic.id === id));
+// с комплектациями цена берётся из выбранной, сначала из базовой
+const shownPrice = kits[0]?.price ?? price;
+const kitOrderValue = (kit: (typeof kits)[number]) => `${kit.title}, ${kit.price}`;
+// без JS уходит сообщение с параметрами по умолчанию, скрипт ниже обновляет его по выбору и дописывает адрес
+const orderMessage = [
+  modelOrderMessage(title),
+  modelPlastics[0] && `${modelOrderColorLabel}: ${modelPlastics[0].name}`,
+  kits[0] && `${modelOrderKitLabel}: ${kitOrderValue(kits[0])}`,
+]
+  .filter(Boolean)
+  .join('\n');
 const categoryLabel = catalogFilters.find((filter) => filter.id === category)?.label;
 const paragraphs = description ? description.split(/\n\s*\n/) : [];
 // лента под страницей: остальные модели каталога
@@ -108,10 +128,102 @@ const others = (await getApprovedModels()).filter((other) => other.id !== model.
           <div class="model__card model__buy">
             {categoryLabel && <span class="model__category">{categoryLabel}</span>}
             <h1 class="model__title">{title}</h1>
-            {price && <span class="model__price">{price}</span>}
-            <!-- куда ведёт заказ, пока не решено -->
-            <Button class="model__cta" href="#" arrow>{catalogCtaLabel}</Button>
+            {shownPrice && <span class="model__price" data-kit-price-target>{shownPrice}</span>}
+            <Button
+              class="model__cta"
+              href={telegramLink(orderMessage)}
+              target="_blank"
+              rel="noopener"
+              data-order-message={modelOrderMessage(title)}
+              arrow
+            >
+              {catalogCtaLabel}
+            </Button>
           </div>
+
+          {modelPlastics.length > 0 && (
+            <div class="model__card model__picker" data-picker data-order-label={modelOrderColorLabel}>
+              <h2 class="model__card-title">{modelColorsTitle}</h2>
+              <div class="model__swatches" role="group" aria-label={modelColorsTitle}>
+                {modelPlastics.map((plastic, index) => (
+                  <button
+                    class="model__swatch"
+                    type="button"
+                    style={`--swatch-color: ${plastic.color}`}
+                    aria-pressed={index === 0 ? 'true' : 'false'}
+                    aria-label={plastic.name}
+                    data-pick={plastic.id}
+                    data-order-value={plastic.name}
+                  />
+                ))}
+              </div>
+
+              <!-- поп-ап с пояснением: с мышью рядом с блоком по наведению, на таче на весь экран по тапу -->
+              {modelPlastics.map((plastic) => (
+                <div class="model__pop" data-pick-pop={plastic.id} hidden>
+                  <div class="model__pop-body">
+                    <span class="model__pop-sample" style={`--swatch-color: ${plastic.color}`}></span>
+                    <h3 class="model__pop-title">{plastic.name}</h3>
+                    <p class="model__pop-text">{plastic.description}</p>
+                    <button class="model__pop-close" type="button" aria-label={modelPopupCloseLabel} data-pick-pop-close>
+                      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3 3 13" /></svg>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {kits.length > 0 && (
+            <div class="model__card model__picker" data-picker data-kits data-order-label={modelOrderKitLabel}>
+              <h2 class="model__card-title">{modelKitsTitle}</h2>
+              <div class="model__kit-list" role="group" aria-label={modelKitsTitle}>
+                {kits.map((kit, index) => (
+                  <button
+                    class="model__kit"
+                    type="button"
+                    aria-pressed={index === 0 ? 'true' : 'false'}
+                    data-pick={index}
+                    data-kit-price={kit.price}
+                    data-order-value={kitOrderValue(kit)}
+                  >
+                    <span class="model__kit-media">
+                      {kit.image ? (
+                        <Image src={kit.image} alt="" widths={[160, 320]} sizes="160px" />
+                      ) : (
+                        <svg class="model__placeholder" viewBox="0 0 48 48" aria-hidden="true">
+                          <path d="M24 6 40 15v18L24 42 8 33V15z M8 15l16 9 16-9 M24 24v18" />
+                        </svg>
+                      )}
+                    </span>
+                    <span class="model__kit-title">{kit.title}</span>
+                  </button>
+                ))}
+              </div>
+
+              {kits.map((kit, index) => (
+                <div class="model__pop" data-pick-pop={index} hidden>
+                  <div class="model__pop-body">
+                    <span class="model__pop-media">
+                      {kit.image ? (
+                        <Image src={kit.image} alt="" widths={[320, 640]} sizes="(max-width: 720px) 90vw, 300px" />
+                      ) : (
+                        <svg class="model__placeholder" viewBox="0 0 48 48" aria-hidden="true">
+                          <path d="M24 6 40 15v18L24 42 8 33V15z M8 15l16 9 16-9 M24 24v18" />
+                        </svg>
+                      )}
+                    </span>
+                    <h3 class="model__pop-title">{kit.title}</h3>
+                    <span class="model__pop-price">{kit.price}</span>
+                    {kit.description && <p class="model__pop-text">{kit.description}</p>}
+                    <button class="model__pop-close" type="button" aria-label={modelPopupCloseLabel} data-pick-pop-close>
+                      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3 3 13" /></svg>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </aside>
       </div>
 
@@ -148,6 +260,11 @@ const others = (await getApprovedModels()).filter((other) => other.id !== model.
     --model-aside-width: clamp(280px, 30%, 380px);
     --model-thumb-size: clamp(64px, 8vw, 104px);
     --model-ribbon-card: clamp(220px, 24%, 280px);
+    --model-swatch-size: 36px;
+    --model-swatch-gap: 10px;
+    --model-swatch-radius: 8px;
+    --model-pop-width: 300px;
+    --model-pop-close-size: 44px;
     --model-back-arrow: 0.75em;
     --model-arrow-stroke: 2.5px;
     --model-kind-padding: 2px 10px;
@@ -393,6 +510,195 @@ const others = (await getApprovedModels()).filter((other) => other.id !== model.
     font-weight: var(--fw-bold);
   }
 
+  .model__card-title {
+    font-size: var(--fs-card-title);
+    font-weight: var(--fw-bold);
+    line-height: 1.2;
+  }
+
+  /* блоки выбора держат свой поп-ап */
+  .model__picker {
+    position: relative;
+  }
+
+  /* цвета квадратиками, выбранный «нажат» акцентной обводкой */
+  .model__swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--model-swatch-gap);
+  }
+
+  .model__swatch {
+    width: var(--model-swatch-size);
+    aspect-ratio: 1;
+    padding: 0;
+    border: var(--stroke-lift) solid transparent;
+    border-radius: var(--model-swatch-radius);
+    background: var(--swatch-color);
+    cursor: pointer;
+    transition: transform var(--transition-lift), box-shadow var(--transition-lift), border-color var(--transition-lift);
+  }
+
+  .model__swatch[aria-pressed='true'] {
+    border-color: var(--color-accent);
+  }
+
+  .model__swatch:focus-visible {
+    transform: translateY(var(--lift-hover-sm));
+    border-color: var(--color-black);
+    box-shadow: var(--shadow-lift-sm);
+    outline: none;
+  }
+
+  @media (hover: hover) {
+    .model__swatch[aria-pressed='false']:hover {
+      transform: translateY(var(--lift-hover-sm));
+      border-color: var(--color-black);
+      box-shadow: var(--shadow-lift-sm);
+    }
+  }
+
+  /* поп-ап в стиле подсказок каталога: голубой, «наклейка» */
+  .model__pop {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    right: calc(100% + var(--model-gap-sm));
+    width: var(--model-pop-width);
+  }
+
+  .model__pop[hidden] {
+    display: none;
+  }
+
+  .model__pop-body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--model-gap-sm);
+    padding: var(--model-card-padding);
+    border-radius: var(--radius-card-sm);
+    background: var(--color-info);
+    box-shadow: var(--shadow-sticker);
+    color: var(--color-dark);
+  }
+
+  .model__pop-sample {
+    display: block;
+    aspect-ratio: 16 / 10;
+    border: var(--stroke-panel) solid var(--color-black);
+    border-radius: var(--radius-card-sm);
+    background: var(--swatch-color);
+  }
+
+  /* превью комплектации крупно */
+  .model__pop-media {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border: var(--stroke-panel) solid var(--color-black);
+    border-radius: var(--radius-card-sm);
+    background: var(--color-hero-glass);
+  }
+
+  .model__pop-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .model__pop-price {
+    font-size: var(--fs-card-text);
+    font-weight: var(--fw-bold);
+  }
+
+  .model__pop-title {
+    font-size: var(--fs-card-title);
+    font-weight: var(--fw-bold);
+    line-height: 1.2;
+  }
+
+  .model__pop-text {
+    font-size: var(--fs-card-text);
+    font-weight: var(--fw-medium);
+    line-height: 1.4;
+  }
+
+  /* крестик нужен только на весь экран */
+  .model__pop-close {
+    display: none;
+  }
+
+  /* комплектации плитками по две, выбранная «нажата» акцентной обводкой */
+  .model__kit-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--model-gap-sm);
+  }
+
+  .model__kit {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--model-gap-sm) / 2);
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: center;
+    cursor: pointer;
+    transition: transform var(--transition-lift);
+  }
+
+  .model__kit-media {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: var(--stroke-lift) solid transparent;
+    border-radius: var(--radius-card-sm);
+    background: var(--color-hero-glass);
+    transition: box-shadow var(--transition-lift), border-color var(--transition-lift);
+  }
+
+  .model__kit-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .model__kit[aria-pressed='true'] .model__kit-media {
+    border-color: var(--color-accent);
+  }
+
+  .model__kit:focus-visible {
+    transform: translateY(var(--lift-hover-sm));
+    outline: none;
+  }
+
+  .model__kit:focus-visible .model__kit-media {
+    border-color: var(--color-black);
+    box-shadow: var(--shadow-lift-sm);
+  }
+
+  @media (hover: hover) {
+    .model__kit[aria-pressed='false']:hover {
+      transform: translateY(var(--lift-hover-sm));
+    }
+
+    .model__kit[aria-pressed='false']:hover .model__kit-media {
+      border-color: var(--color-black);
+      box-shadow: var(--shadow-lift-sm);
+    }
+  }
+
+  .model__kit-title {
+    font-size: var(--fs-hint);
+    font-weight: var(--fw-semibold);
+    line-height: 1.2;
+  }
+
   .model__buy :global(.model__cta) {
     margin-top: calc(var(--model-gap-sm) / 2);
   }
@@ -426,12 +732,18 @@ const others = (await getApprovedModels()).filter((other) => other.id !== model.
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .model__thumb {
+    .model__thumb,
+    .model__swatch,
+    .model__kit {
       transition: none;
     }
 
     .model__thumb:focus-visible,
-    .model__thumb[aria-pressed='false']:hover {
+    .model__thumb[aria-pressed='false']:hover,
+    .model__swatch:focus-visible,
+    .model__swatch[aria-pressed='false']:hover,
+    .model__kit:focus-visible,
+    .model__kit[aria-pressed='false']:hover {
       transform: none;
     }
   }
@@ -446,6 +758,14 @@ const others = (await getApprovedModels()).filter((other) => other.id !== model.
       display: contents;
     }
 
+    /* слева места нет: поп-ап под блоком выбора */
+    .model__pop {
+      top: calc(100% + var(--model-gap-sm));
+      right: 0;
+      left: 0;
+      width: auto;
+    }
+
     .model__gallery {
       order: 1;
     }
@@ -457,6 +777,54 @@ const others = (await getApprovedModels()).filter((other) => other.id !== model.
 
     .model__about {
       order: 3;
+    }
+  }
+
+  /* на таче поп-ап открывается тапом на весь экран, закрыть крестиком или тапом мимо */
+  @media (hover: none), (pointer: coarse) {
+    .model__pop {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: grid;
+      align-items: center;
+      width: auto;
+      padding: var(--gutter);
+      background: var(--color-backdrop);
+    }
+
+    .model__pop-body {
+      max-height: 100%;
+      overflow-y: auto;
+    }
+
+    .model__pop-close {
+      position: absolute;
+      top: var(--model-gap-sm);
+      right: var(--model-gap-sm);
+      display: grid;
+      place-items: center;
+      width: var(--model-pop-close-size);
+      height: var(--model-pop-close-size);
+      padding: 0;
+      border: var(--stroke-panel) solid var(--color-black);
+      border-radius: var(--radius-pill);
+      background: var(--color-accent);
+      color: var(--color-black);
+      cursor: pointer;
+    }
+
+    .model__pop-close svg {
+      width: 40%;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: var(--model-arrow-stroke);
+      stroke-linecap: round;
+    }
+
+    .model__pop-sample,
+    .model__pop-media {
+      margin-top: var(--model-pop-close-size);
     }
   }
 
@@ -485,6 +853,8 @@ const others = (await getApprovedModels()).filter((other) => other.id !== model.
 </style>
 
 <script>
+  import { telegramLink } from '@/data/contacts';
+
   // клик по мелкому фото показывает его в большом окне
   document.querySelectorAll<HTMLElement>('[data-gallery]').forEach((gallery) => {
     const thumbs = gallery.querySelectorAll<HTMLButtonElement>('[data-gallery-thumb]');
@@ -499,5 +869,69 @@ const others = (await getApprovedModels()).filter((other) => other.id !== model.
         });
       });
     });
+  });
+
+  // блоки выбора (цвет, комплектация): клик выбирает; с мышью поп-ап показывается рядом
+  // по наведению или фокусу, на таче тап ещё и открывает его на весь экран
+  const canHover = window.matchMedia('(hover: hover) and (pointer: fine)');
+
+  document.querySelectorAll<HTMLElement>('[data-picker]').forEach((block) => {
+    const items = block.querySelectorAll<HTMLButtonElement>('[data-pick]');
+    const pops = block.querySelectorAll<HTMLElement>('[data-pick-pop]');
+    const show = (id?: string) => {
+      pops.forEach((pop) => {
+        pop.hidden = pop.dataset.pickPop !== id;
+      });
+    };
+
+    items.forEach((item) => {
+      const id = item.dataset.pick;
+      item.addEventListener('click', () => {
+        items.forEach((other) => other.setAttribute('aria-pressed', String(other === item)));
+        if (!canHover.matches) show(id);
+      });
+      item.addEventListener('mouseenter', () => canHover.matches && show(id));
+      item.addEventListener('mouseleave', () => canHover.matches && show());
+      item.addEventListener('focus', () => canHover.matches && show(id));
+      item.addEventListener('blur', () => canHover.matches && show());
+    });
+
+    pops.forEach((pop) => {
+      pop.addEventListener('click', (event) => {
+        const target = event.target as Element;
+        if (target === pop || target.closest('[data-pick-pop-close]')) show();
+      });
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') show();
+    });
+  });
+
+  // комплектация меняет цену в карточке покупки
+  const price = document.querySelector<HTMLElement>('[data-kit-price-target]');
+
+  document.querySelectorAll<HTMLButtonElement>('[data-kits] [data-kit-price]').forEach((kit) => {
+    kit.addEventListener('click', () => {
+      if (price && kit.dataset.kitPrice) price.textContent = kit.dataset.kitPrice;
+    });
+  });
+
+  // «Хочу такую» открывает личку с сообщением: модель, выбранные цвет и комплектация, адрес страницы.
+  // домена пока нет, поэтому адрес берём из текущей страницы
+  const updateOrderLink = () => {
+    document.querySelectorAll<HTMLAnchorElement>('[data-order-message]').forEach((link) => {
+      const choices = [...document.querySelectorAll<HTMLElement>('[data-order-label]')].flatMap((block) => {
+        const picked = block.querySelector<HTMLElement>('[aria-pressed="true"][data-order-value]');
+        return picked ? [`${block.dataset.orderLabel}: ${picked.dataset.orderValue}`] : [];
+      });
+      const lines = [link.dataset.orderMessage, ...choices, location.origin + location.pathname];
+      link.href = telegramLink(lines.join('\n'));
+    });
+  };
+
+  updateOrderLink();
+  document.querySelectorAll('[data-order-label] [data-pick]').forEach((item) => {
+    item.addEventListener('click', updateOrderLink);
   });
 </script>

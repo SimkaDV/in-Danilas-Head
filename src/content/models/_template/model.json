@@ -14,5 +14,10 @@
     { "label": "Материал", "value": "PLA" },
     { "label": "Размер", "value": "10 × 10 × 5 см" },
     { "label": "Время печати", "value": "4 ч" }
+  ],
+  "colors": ["brown", "beige", "chocolate"],
+  "kits": [
+    { "title": "Базовый", "price": "2500 ₽", "description": "Что входит в базовый набор", "image": "./kit-base.png" },
+    { "title": "Набор", "price": "3200 ₽", "description": "Что добавляется в наборе" }
   ]
 }

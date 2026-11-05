@@ -1,3 +1,5 @@
+import { telegramLink } from '@/data/contacts';
+
 export const flagshipEyebrow = 'Я произвёл штуку:';
 export const flagshipTitle = 'Кейс-трансформер';
 export const flagshipVariantsLabel = 'Он умеет быть';
@@ -9,10 +11,10 @@ export const flagshipVariants = [
   { id: 'pills', label: 'Таблетницей' },
 ];
 
+// пока ведёт в личку, позже на страницу коллекции (см. ROADMAP)
 export const flagshipCta = {
   label: 'Собрать кейс',
-  href: '#',
-  hint: 'Тыкни сюда и увидишь больше про него',
+  href: telegramLink('Привет, хочу собрать кейс-трансформер'),
 };
 
 export const flagshipFeaturesTitle = 'У него реально много приколов';
