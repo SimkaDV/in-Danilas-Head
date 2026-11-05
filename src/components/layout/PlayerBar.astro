@@ -1,0 +1,32 @@
+---
+import Player from '@/components/islands/Player';
+import { playerStyles, playerText } from '@/data/player';
+---
+<!-- липкая полоса плеера: приклеена к верху экрана над всеми блоками, на всех страницах -->
+<div class="player-bar">
+  <Player client:load styles={playerStyles} text={playerText} />
+</div>
+
+<style>
+  .player-bar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    /* полоса прижата к верху экрана, верх носителя уходит за край */
+    padding: 0 var(--gutter);
+    /* поля вокруг полосы пропускают клики к странице */
+    pointer-events: none;
+  }
+
+  @media (max-width: 720px) {
+    .player-bar {
+      --player-height: 56px;
+      --player-disc-size: 76px;
+      --player-disc-ring: 6px;
+      --player-button-size: 26px;
+      --player-dot-size: 10px;
+      --player-button-gap: 10px;
+      --fs-player-label: 11px;
+    }
+  }
+</style>
