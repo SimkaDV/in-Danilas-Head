@@ -8,13 +8,18 @@ export interface PlayerStyle {
   playlistUrl: string;
 }
 
-// пока один плейлист на все стили, позже у каждого будет свой
-const testPlaylist = 'https://soundcloud.com/danila-simonov-381433862/sets/muzyka-dlya-voli-k-zhizni';
+// плейлисты должны быть открытыми, закрытый – только по номеру с секретным ключом (см. jazzPrivate)
+const playlist = (slug: string) => `https://soundcloud.com/danila-simonov-381433862/sets/${slug}`;
+
+// «Фон джаз / интструментал» пока закрытый: плеер SoundCloud берёт такой плейлист только по номеру
+// с секретным ключом (из кода встраивания), обычная ссылка с /s-… не работает. Станет открытым –
+// можно вернуть playlist('fon-dzhaz-intstrumental')
+const jazzPrivate = 'https://api.soundcloud.com/playlists/2325124701?secret_token=s-cvYLtlHIbuI';
 
 export const playerStyles: PlayerStyle[] = [
-  { id: 'techno', label: 'Techno', medium: 'cd', playlistUrl: testPlaylist },
-  { id: 'lofi', label: 'LoFi', medium: 'cassette', playlistUrl: testPlaylist },
-  { id: 'jazz', label: 'Jazz', medium: 'vinyl', playlistUrl: testPlaylist },
+  { id: 'techno', label: 'Techno', medium: 'cd', playlistUrl: playlist('fon-elektro') },
+  { id: 'lofi', label: 'LoFi', medium: 'cassette', playlistUrl: playlist('idealnyj-fon') },
+  { id: 'jazz', label: 'Jazz', medium: 'vinyl', playlistUrl: jazzPrivate },
 ];
 
 export const playerText = {

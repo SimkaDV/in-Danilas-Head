@@ -21,6 +21,8 @@ interface Props {
 }
 
 const PAUSE = 'pause';
+// столько ждём, пока плейлист начнёт играть; дольше – значит, он закрыт или удалён
+const LOAD_TIMEOUT = 12000;
 
 // липкая полоса сверху: слева кнопки стилей, по центру крутится носитель, справа «что играет» с поп-апом
 export default function Player({ styles, text }: Props) {
@@ -34,6 +36,8 @@ export default function Player({ styles, text }: Props) {
   const widget = useRef<Promise<SoundCloudWidget> | null>(null);
   const loadedUrl = useRef<string | null>(null);
   const wantPlay = useRef(false);
+  const ready = useRef(false);
+  const loadTimer = useRef<number | undefined>(undefined);
   const canHover = useRef(false);
 
   useEffect(() => {
@@ -46,6 +50,7 @@ export default function Player({ styles, text }: Props) {
   // виджет создаётся один раз, по первому нажатию на стиль
   const getWidget = (url: string) => {
     widget.current ??= createWidget(host.current!, url).then(({ widget: w, events }) => {
+      ready.current = true;
       loadedUrl.current = url;
       const refreshTrack = () =>
         w.getCurrentSound((sound) => {
@@ -61,6 +66,7 @@ export default function Player({ styles, text }: Props) {
       w.bind(events.PLAY, () => {
         // кнопку паузы могли нажать, пока трек грузился
         if (!wantPlay.current) return w.pause();
+        window.clearTimeout(loadTimer.current);
         setStatus('playing');
         refreshTrack();
       });
@@ -79,12 +85,28 @@ export default function Player({ styles, text }: Props) {
     return widget.current;
   };
 
+  // плейлист не заиграл: закрыт, удалён или SoundCloud недоступен
+  const failLoad = () => {
+    wantPlay.current = false;
+    loadedUrl.current = null;
+    // виджет так и не поднялся: в следующий раз создаём заново
+    if (!ready.current) {
+      widget.current = null;
+      host.current?.replaceChildren();
+    }
+    setMode(PAUSE);
+    setTrack(null);
+    setStatus('error');
+  };
+
   const pickStyle = async (style: PlayerStyle) => {
     if (style.id === mode) return;
     setMode(style.id);
     setMedium(style.medium);
     wantPlay.current = true;
     if (status !== 'playing' && status !== 'paused') setStatus('loading');
+    window.clearTimeout(loadTimer.current);
+    loadTimer.current = window.setTimeout(failLoad, LOAD_TIMEOUT);
 
     try {
       const w = await getWidget(style.playlistUrl);
@@ -94,14 +116,13 @@ export default function Player({ styles, text }: Props) {
       } else {
         // другой плейлист: грузим его и сразу играем
         loadedUrl.current = style.playlistUrl;
+        setTrack(null);
         setStatus('loading');
         w.load(style.playlistUrl, widgetOptions);
       }
     } catch {
-      widget.current = null;
-      wantPlay.current = false;
-      setMode(PAUSE);
-      setStatus('error');
+      window.clearTimeout(loadTimer.current);
+      failLoad();
     }
   };
 
@@ -109,6 +130,7 @@ export default function Player({ styles, text }: Props) {
     if (mode === PAUSE) return;
     setMode(PAUSE);
     wantPlay.current = false;
+    window.clearTimeout(loadTimer.current);
     if (widget.current) (await widget.current).pause();
     setStatus((current) => (current === 'loading' ? 'idle' : current === 'playing' ? 'paused' : current));
   };
