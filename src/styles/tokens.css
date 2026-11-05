@@ -73,5 +73,5 @@
 
   --container: 1200px;
   --gutter: clamp(16px, 4vw, 40px);
-  --section-gap: clamp(48px, 8vw, 96px);
+  --section-gap: clamp(48px, 5.33vw, 64px);
 }
