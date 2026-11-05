@@ -19,8 +19,9 @@ export const flagshipCta = {
 
 export const flagshipFeaturesTitle = 'У него реально много приколов';
 
+// icon – заглушка, пока нет иллюстраций с демонстрацией фишки
 export const flagshipFeatures = [
-  { title: 'Он на магнитах!!', text: 'Очень удобно отсоединять и соединять', shape: 'a' },
-  { title: 'Много модулей', text: 'Пока я придумал 6', shape: 'b' },
-  { title: 'Кастомизируй как хочешь', text: 'Реально почти всё меняй и балдей', shape: 'c' },
+  { title: 'Он на магнитах!!', text: 'Очень удобно отсоединять и соединять', shape: 'a', icon: 'magnet' },
+  { title: 'Много модулей', text: 'Пока я придумал 6', shape: 'b', icon: 'modules' },
+  { title: 'Кастомизируй как хочешь', text: 'Реально почти всё меняй и балдей', shape: 'c', icon: 'palette' },
 ] as const;

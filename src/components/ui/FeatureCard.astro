@@ -3,26 +3,87 @@ interface Props {
   title: string;
   text: string;
   shape?: 'a' | 'b' | 'c';
+  icon?: 'magnet' | 'modules' | 'palette';
 }
 
-const { title, text, shape = 'a' } = Astro.props;
+const { title, text, shape = 'a', icon } = Astro.props;
 ---
 <article class:list={['feature-card', `feature-card--${shape}`]}>
-  <h4 class="feature-card__title">{title}</h4>
-  <p class="feature-card__text">{text}</p>
+  <!-- пока иконка-заглушка, позже сюда встанет иллюстрация фишки -->
+  {icon && (
+    <div class="feature-card__art" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        {icon === 'magnet' && (
+          <>
+            <path d="m6 15-4-4 6.75-6.77a7.79 7.79 0 0 1 11 11L13 22l-4-4 6.39-6.36a2.14 2.14 0 0 0-3-3L6 15" />
+            <path d="m5 8 4 4" />
+            <path d="m12 15 4 4" />
+          </>
+        )}
+        {icon === 'modules' && (
+          <>
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <path d="M10 21V8a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5a1 1 0 0 0-1-1H3" />
+          </>
+        )}
+        {icon === 'palette' && (
+          <>
+            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.65-.75 1.65-1.69 0-.44-.18-.84-.44-1.13-.29-.29-.44-.65-.44-1.13a1.64 1.64 0 0 1 1.67-1.67h2c3.05 0 5.55-2.5 5.55-5.55C21.97 6.01 17.46 2 12 2z" />
+            <circle cx="13.5" cy="6.5" r="1" fill="currentColor" />
+            <circle cx="17.5" cy="10.5" r="1" fill="currentColor" />
+            <circle cx="8.5" cy="7.5" r="1" fill="currentColor" />
+            <circle cx="6.5" cy="12.5" r="1" fill="currentColor" />
+          </>
+        )}
+      </svg>
+    </div>
+  )}
+  <div class="feature-card__body">
+    <h4 class="feature-card__title">{title}</h4>
+    <p class="feature-card__text">{text}</p>
+  </div>
 </article>
 
 <style>
   .feature-card {
     --card-padding: clamp(18px, 2vw, 28px);
     --card-gap: clamp(12px, 1.4vw, 20px);
+    --card-art-size: clamp(72px, 7vw, 96px);
+    --card-art-icon: 55%;
+    --card-art-stroke: 1.6;
 
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: var(--card-gap);
     padding: var(--card-padding);
     background: var(--color-deep);
     color: var(--color-text-inverse);
+  }
+
+  .feature-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--card-gap);
+    min-width: 0;
+  }
+
+  /* картинка с той стороны, куда выровнен текст: слева, справа, слева; на десктопе над текстом, в одну колонку сбоку */
+  .feature-card__art {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: var(--card-art-size);
+    aspect-ratio: 1;
+    border-radius: var(--radius-card-sm);
+    background: var(--color-dark);
+    color: var(--color-accent);
+  }
+
+  .feature-card__art svg {
+    width: var(--card-art-icon);
+    height: var(--card-art-icon);
+    stroke-width: var(--card-art-stroke);
   }
 
   /* у каждой карточки свой «вырезанный» угол */
@@ -31,6 +92,7 @@ const { title, text, shape = 'a' } = Astro.props;
   }
 
   .feature-card--b {
+    align-items: flex-end;
     border-radius: var(--radius-card-lg) var(--radius-card-sm) var(--radius-card-lg) var(--radius-card-sm);
     text-align: end;
   }
@@ -49,5 +111,20 @@ const { title, text, shape = 'a' } = Astro.props;
     font-size: var(--fs-card-text);
     font-weight: var(--fw-medium);
     line-height: 1.35;
+  }
+
+  @media (max-width: 720px) {
+    .feature-card {
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .feature-card--b {
+      flex-direction: row-reverse;
+    }
+
+    .feature-card__body {
+      flex: 1;
+    }
   }
 </style>
