@@ -24,5 +24,8 @@ export const catalogCtaLabel = 'Хочу такую';
 
 // страница модели
 export const modelBackLabel = 'Назад в каталог';
+export const modelAboutTitle = 'Об айтеме';
 export const modelSpecsTitle = 'Характеристики';
+export const modelPhotoPickLabel = 'Показать фото';
+export const modelMoreTitle = 'Ещё из каталога';
 export const modelImageKinds = { render: 'Рендер', photo: 'Фото' } as const;

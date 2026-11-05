@@ -45,6 +45,13 @@
   --transition-lift: 0.2s ease;
   --lift-stagger: 0.12s; /* шаг, с которым ряд кнопок поднимается прокруткой по очереди */
 
+  /* скроллбар в стиле сайта (десктоп): акцентный ползунок с чёрной обводкой на тёмной дорожке */
+  --scrollbar-size: 14px;
+  --scrollbar-stroke: 2px;
+  --color-scrollbar-track: var(--color-dark);
+  --color-scrollbar-thumb: var(--color-button);
+  --color-scrollbar-thumb-hover: var(--color-accent);
+
   /* about: бенто-сетка интересов, theme карточки → цвет */
   --color-interest-olive: #7A9371;
   --color-interest-sage: #719381;
