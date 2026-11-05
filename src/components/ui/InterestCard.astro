@@ -215,5 +215,10 @@ const Tag = href ? 'a' : 'div';
       order: -1;
       aspect-ratio: 16 / 10;
     }
+
+    /* квадратное фото высотой с фото длинной карточки (16:10 во всю ширину), поэтому шириной 10/16 */
+    .interest--square .interest__media {
+      width: calc(100% * 10 / 16);
+    }
   }
 </style>
