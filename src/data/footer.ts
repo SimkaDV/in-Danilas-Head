@@ -1,10 +1,11 @@
 import { heroLinks } from './hero';
+import { telegramChannel } from './contacts';
 
 export const footerTitle = 'В голове у Даньки';
 
-// ссылки соцсетей проекта, пока заглушки
+// ссылки соцсетей проекта, Instagram пока заглушка
 export const footerSocials = [
-  { id: 'telegram', label: 'Telegram', href: '#' },
+  { id: 'telegram', label: 'Telegram', href: telegramChannel },
   { id: 'instagram', label: 'Instagram', href: '#' },
 ] as const;
 
