@@ -74,6 +74,10 @@
   --shadow-player-glow: 0 0 8px var(--color-accent);
   --shadow-player-socket: inset 2px 2px 4px var(--color-black);
   --player-spin: 3s; /* один оборот носителя */
+  --player-skip-size: 32px; /* стрелки «назад / вперёд» по бокам носителя */
+  --player-skip-gap: 10px; /* от носителя до стрелки */
+  --player-skip-slide: 0.35s ease; /* выезд стрелок из-под носителя и сжатие «Show» на телефоне */
+  --player-skip-stagger: 0.15s; /* на телефоне «Show» разжимается, когда стрелки уже начали прятаться */
   /* заглушки носителей: цвет и полоска-метка, по которой видно вращение */
   --color-medium-cd: #C9D6DF;
   --color-medium-cd-shine: #F4F8FB;

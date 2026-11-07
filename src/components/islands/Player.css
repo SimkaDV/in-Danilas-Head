@@ -113,6 +113,7 @@
   height: var(--player-disc-size);
   margin-top: calc(var(--player-disc-size) / -2);
   padding: var(--player-disc-ring);
+  z-index: 1;
   border-radius: 50%;
   background: var(--color-dark);
 }
@@ -191,6 +192,75 @@
   }
 }
 
+/* стрелки «назад / вперёд»: прячутся под носителем и выезжают по бокам, пока играет музыка */
+.player__skip {
+  --skip-shift: 0px;
+  --skip-lift: 0px;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: var(--player-skip-size);
+  height: var(--player-skip-size);
+  margin: calc(var(--player-skip-size) / -2) 0 0 calc(var(--player-skip-size) / -2);
+  padding: 0;
+  border: var(--stroke-lift) solid transparent;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: var(--color-black);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(var(--skip-shift), var(--skip-lift)) scale(0.5);
+  transition:
+    transform var(--player-skip-slide),
+    opacity var(--player-skip-slide),
+    visibility 0s linear var(--player-skip-slide),
+    box-shadow var(--transition-lift),
+    border-color var(--transition-lift);
+}
+
+.player__skip--prev {
+  --skip-shift: calc(-1 * (var(--player-disc-size) + var(--player-skip-size)) / 2 - var(--player-skip-gap));
+}
+
+.player__skip--next {
+  --skip-shift: calc((var(--player-disc-size) + var(--player-skip-size)) / 2 + var(--player-skip-gap));
+}
+
+.player__deck[data-skip] .player__skip {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(var(--skip-shift), var(--skip-lift));
+  transition-delay: 0s;
+}
+
+.player__skip svg {
+  width: 50%;
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 2.5px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.player__deck[data-skip] .player__skip:focus-visible {
+  --skip-lift: var(--lift-hover-sm);
+  border-color: var(--color-black);
+  box-shadow: var(--shadow-lift-sm);
+  outline: none;
+}
+
+@media (hover: hover) {
+  .player__deck[data-skip] .player__skip:hover {
+    --skip-lift: var(--lift-hover-sm);
+    border-color: var(--color-black);
+    box-shadow: var(--shadow-lift-sm);
+  }
+}
+
 /* «что играет»: на всю высоту полосы, чтобы поп-ап начинался сразу под ней */
 .player__now {
   position: relative;
@@ -223,6 +293,10 @@
 .player__show {
   padding: var(--player-show-padding);
   font-size: var(--fs-player-text);
+}
+
+.player__show-icon {
+  display: none;
 }
 
 .player__show:focus-visible,
@@ -357,6 +431,74 @@
     justify-self: end;
   }
 
+  /* пока играет музыка, «Show» сжимается в кружок с лупой, кнопки стилей сдвигаются теснее,
+     и стрелкам хватает места рядом с носителем. Обратно – с задержкой, когда стрелки уже прячутся */
+  .player__modes {
+    transition: gap var(--player-skip-slide) var(--player-skip-stagger);
+  }
+
+  .player__show {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    min-width: var(--player-button-size);
+    height: var(--player-button-size);
+    padding-block: 0;
+    transition:
+      transform var(--transition-lift),
+      box-shadow var(--transition-lift),
+      border-color var(--transition-lift),
+      padding var(--player-skip-slide) var(--player-skip-stagger);
+  }
+
+  .player__show-label {
+    max-width: 3em;
+    overflow: hidden;
+    white-space: nowrap;
+    transition:
+      max-width var(--player-skip-slide) var(--player-skip-stagger),
+      opacity var(--player-skip-slide) var(--player-skip-stagger);
+  }
+
+  .player__show-icon {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 55%;
+    margin: auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.5px;
+    stroke-linecap: round;
+    opacity: 0;
+    transform: scale(0.4) rotate(-90deg);
+    transition:
+      opacity var(--player-skip-slide),
+      transform var(--player-skip-slide);
+  }
+
+  .player[data-skip] .player__modes {
+    gap: var(--player-button-gap-playing);
+    transition-delay: 0s;
+  }
+
+  .player[data-skip] .player__show {
+    padding-inline: 0;
+    transition-delay: 0s;
+  }
+
+  .player[data-skip] .player__show-label {
+    max-width: 0;
+    opacity: 0;
+    transition-delay: 0s;
+  }
+
+  .player[data-skip] .player__show-icon {
+    opacity: 1;
+    transform: none;
+    transition-delay: var(--player-skip-stagger);
+  }
+
   .player__now-label {
     position: absolute;
     width: 1px;
@@ -423,6 +565,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .player__skip,
+  .player__modes,
+  .player__show-label,
+  .player__show-icon,
   .player__socket,
   .player__show,
   .player__pop-link {
@@ -432,6 +578,10 @@
   .player__disc::before,
   .player__disc[data-loading]::before {
     animation: none;
+  }
+
+  .player__deck[data-skip] .player__skip {
+    --skip-lift: 0px;
   }
 
   .player__mode:hover .player__socket,

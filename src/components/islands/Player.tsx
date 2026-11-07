@@ -15,7 +15,19 @@ interface Track {
 interface Props {
   styles: PlayerStyle[];
   text: Record<
-    'label' | 'modesLabel' | 'pause' | 'nowPlaying' | 'show' | 'popupTitle' | 'idle' | 'loading' | 'error' | 'listen' | 'close',
+    | 'label'
+    | 'modesLabel'
+    | 'pause'
+    | 'prev'
+    | 'next'
+    | 'nowPlaying'
+    | 'show'
+    | 'popupTitle'
+    | 'idle'
+    | 'loading'
+    | 'error'
+    | 'listen'
+    | 'close',
     string
   >;
 }
@@ -23,6 +35,8 @@ interface Props {
 const PAUSE = 'pause';
 // столько ждём, пока плейлист начнёт играть; дольше – значит, он закрыт или удалён
 const LOAD_TIMEOUT = 12000;
+// «назад» после стольких мс трека отматывает его в начало, раньше – переключает на предыдущий
+const RESTART_AFTER = 3000;
 
 // липкая полоса сверху: слева кнопки стилей, по центру крутится носитель, справа «что играет» с поп-апом
 export default function Player({ styles, text }: Props) {
@@ -135,13 +149,28 @@ export default function Player({ styles, text }: Props) {
     setStatus((current) => (current === 'loading' ? 'idle' : current === 'playing' ? 'paused' : current));
   };
 
+  // стрелки: «вперёд» после последнего трека начинает плейлист сначала,
+  // «назад» сначала отматывает текущий трек в начало, повторное нажатие – предыдущий трек
+  const skipTrack = async (direction: 'prev' | 'next') => {
+    if (!widget.current) return;
+    const w = await widget.current;
+    w.getSounds((sounds) =>
+      w.getCurrentSoundIndex((index) => {
+        if (direction === 'next') return index >= sounds.length - 1 ? w.skip(0) : w.next();
+        w.getPosition((position) => (position > RESTART_AFTER || index <= 0 ? w.seekTo(0) : w.prev()));
+      }),
+    );
+  };
+
   const hoverPop = (open: boolean) => canHover.current && setPopOpen(open);
 
   const message = status === 'error' ? text.error : status === 'loading' && !track ? text.loading : text.idle;
   const spinning = mode !== PAUSE && status === 'playing';
+  // стрелки видны, пока выбран стиль и трек уже заиграл; на паузе и при смене плейлиста прячутся
+  const canSkip = mode !== PAUSE && track !== null && status !== 'error';
 
   return (
-    <div className="player" role="region" aria-label={text.label}>
+    <div className="player" role="region" aria-label={text.label} data-skip={canSkip || undefined}>
       <div className="player__modes" role="group" aria-label={text.modesLabel}>
         <button type="button" className="player__mode" aria-pressed={mode === PAUSE} onClick={pause}>
           <span className="player__socket" aria-hidden="true">
@@ -165,13 +194,24 @@ export default function Player({ styles, text }: Props) {
         ))}
       </div>
 
-      <div className="player__deck" aria-hidden="true">
+      <div className="player__deck" data-skip={canSkip || undefined}>
+        <button type="button" className="player__skip player__skip--prev" aria-label={text.prev} onClick={() => skipTrack('prev')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 5v14M19 5l-10 7 10 7z" />
+          </svg>
+        </button>
         <span
           className="player__disc"
+          aria-hidden="true"
           data-medium={medium ?? 'none'}
           data-spinning={spinning || undefined}
           data-loading={(mode !== PAUSE && status === 'loading') || undefined}
         />
+        <button type="button" className="player__skip player__skip--next" aria-label={text.next} onClick={() => skipTrack('next')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18 5v14M5 5l10 7-10 7z" />
+          </svg>
+        </button>
       </div>
 
       {/* с мышью поп-ап открыт, пока курсор или фокус внутри блока, на таче открывается тапом */}
@@ -190,7 +230,12 @@ export default function Player({ styles, text }: Props) {
           aria-controls="player-pop"
           onClick={() => setPopOpen((open) => (canHover.current ? true : !open))}
         >
-          {text.show}
+          <span className="player__show-label">{text.show}</span>
+          {/* на телефоне, пока играет музыка, кнопка сжимается в кружок с лупой и освобождает место стрелкам */}
+          <svg className="player__show-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="10.5" cy="10.5" r="6" />
+            <path d="M15 15l5 5" />
+          </svg>
         </button>
 
         <div

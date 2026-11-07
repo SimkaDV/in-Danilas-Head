@@ -16,6 +16,10 @@ export interface SoundCloudWidget {
   play(): void;
   pause(): void;
   skip(index: number): void;
+  next(): void;
+  prev(): void;
+  seekTo(milliseconds: number): void;
+  getPosition(callback: (milliseconds: number) => void): void;
   getCurrentSound(callback: (sound: SoundCloudSound | null) => void): void;
   getCurrentSoundIndex(callback: (index: number) => void): void;
   getSounds(callback: (sounds: SoundCloudSound[]) => void): void;

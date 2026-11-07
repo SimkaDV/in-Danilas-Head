@@ -26,6 +26,8 @@ export const playerText = {
   label: 'Музыкальный плеер',
   modesLabel: 'Стиль музыки',
   pause: 'Pause',
+  prev: 'Предыдущий трек',
+  next: 'Следующий трек',
   nowPlaying: "What's playing?",
   show: 'Show',
   popupTitle: 'Сейчас играет',
