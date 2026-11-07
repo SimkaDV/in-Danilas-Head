@@ -24,7 +24,12 @@ const interests = (await getCollection('interests'))
       <ul class="footer__socials">
         {footerSocials.map((social) => (
           <li>
-            <a class="footer__social" href={social.href} aria-label={social.label}>
+            <a
+              class="footer__social"
+              href={social.href}
+              aria-label={social.label}
+              {...(social.href !== '#' && { target: '_blank', rel: 'noopener noreferrer' })}
+            >
               {social.id === 'telegram' && (
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 4 3 11l6 2.5M21 4l-3 16-9-6.5M21 4 9 13.5V19l3-3.5" /></svg>
               )}
