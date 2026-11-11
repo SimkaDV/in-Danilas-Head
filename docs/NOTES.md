@@ -4,13 +4,13 @@
 Палитра: bg #8EAE69, deep #4A6938, dark #292D25, accent #D4FB0B, info #7A9FC0 (второй акцент для подсказок и доп. информации, тот же голубой, что sky в бенто «Обо мне»).
 
 ## Структура
-- src/pages – страницы: главная `index.astro` и шаблон страницы модели `catalog/[slug].astro`
+- src/pages – страницы: главная `index.astro`, шаблон страницы модели `catalog/[slug].astro` и галерея `gallery/index.astro`
 - src/layouts – `Layout.astro`: `<html>`, мета, фон-сетка, футер
-- src/components/ui – мелкие кирпичики (`Button`, `ScrollArrow`, `FeatureCard`, `InterestCard`, `ModelCard`)
+- src/components/ui – мелкие кирпичики (`Button`, `BackLink`, `ScrollArrow`, `FeatureCard`, `InterestCard`, `ModelCard`)
 - src/components/layout – каркас (`Container`, `Section`, `Footer`, `PlayerBar`); шапки (Header) пока нет
 - src/components/sections – блоки страниц (`Hero`, `Flagship`, `About`, `Catalog`)
 - src/components/islands – React-острова (`CaseTabs`, `CatalogFilter`, `Player`)
-- src/data – тексты и данные без разметки (`hero.ts`, `flagship.ts`, `about.ts`, `interests.json`, `footer.ts`, `player.ts`, `catalog.ts`, `models.ts`, `plastics.ts`, `contacts.ts`)
+- src/data – тексты и данные без разметки (`hero.ts`, `flagship.ts`, `about.ts`, `interests.json`, `footer.ts`, `player.ts`, `catalog.ts`, `models.ts`, `plastics.ts`, `contacts.ts`, `gallery.ts`)
 - src/content/models – модели каталога, по папке на модель
 - src/assets – картинки, которые обрабатывает Astro (`head.webp`, `flagship-case.png`, `bg-grid.png`)
 - src/styles – tokens.css (все переменные) и global.css
@@ -71,6 +71,11 @@
 - Фильтр – React-остров `src/components/islands/CatalogFilter.tsx` (`client:visible`), прячет карточки по `data-catalog-category`; использует стили таблеток из `CaseTabs.css`.
 - Волна карточек: `src/scripts/catalog-wave.ts`. Когда сетка доезжает до экрана, карточки по очереди выезжают снизу, поднимаются до состояния ховера и опускаются на место. При смене фильтра видимые быстро уезжают вниз по очереди, потом нужные выезжают той же волной; частые клики не наслаиваются. Анимация – `data-wave` (`pending` / `in` / `out`) и `@keyframes` в `ModelCard.astro`, скорость и шаг в токенах `--wave-*`. Без JS видна вся сетка, под `prefers-reduced-motion` карточки просто появляются.
 
+## Цифровая галерея
+- Страница `src/pages/gallery/index.astro` (`/gallery/`), тексты в `src/data/gallery.ts`. На неё ведут карточка «Цифровая Галерея» в бенто и подвал (`href` в `interests.json`).
+- Пока пустая: плеер, ссылка «Назад к интересам» (на `/#about`), пустая панель в стиле Hero под будущую шапку, подвал. План страницы – в ROADMAP, блок 5.
+- `BackLink` (`src/components/ui/`) – ссылка «назад» со стрелкой, общая для страницы модели и галереи.
+
 ## Telegram
 - Ник и функция `telegramLink(text)` в `src/data/contacts.ts`. Там же ссылка на канал `telegramChannel` (https://t.me/simka_zasranecc). Ссылка `t.me/<ник>?text=...` открывает личку с уже набранным сообщением. Ник публичный, он всё равно виден в ссылке, поэтому лежит прямо в коде, а не в `.env`.
 
@@ -83,12 +88,12 @@
 - Активная таблетка (`aria-pressed=true`) «нажата»: акцентная, с чёрной обводкой, стоит на месте без тени; подъём только на `:focus-visible`.
 - `ScrollArrow` без плашки: сама по кругу (2 с) загорается `--color-accent`, поднимается на `-sm` и получает тень самой линии (`drop-shadow(var(--shadow-lift-sm))`); на ховере и фокусе держится поднятой.
 - `:hover` только внутри `@media (hover: hover)`, иначе на таче он залипает после тапа. `:focus-visible` – снаружи.
-- Подъём при прокрутке: `src/scripts/scroll-lift.ts` (подключён в `Layout.astro`) ставит `data-lifted` элементам с `data-scroll-lift`, пока они в зоне: на таче 55–85% высоты экрана, с мышью 35–65%. Стили `[data-lifted]` те же, что у ховера, поэтому «поднята» – одно состояние, источники не складываются. Сейчас `data-scroll-lift` у `Button`, CTA карточки модели и таблеток. Кнопки, вошедшие в зону разом (ряд), поднимаются по очереди слева направо с шагом `--lift-stagger` (0.25 с). Под `prefers-reduced-motion` скрипт ничего не делает.
+- Подъём при прокрутке: `src/scripts/scroll-lift.ts` (подключён в `Layout.astro`) ставит `data-lifted` элементам с `data-scroll-lift`, пока они в зоне: на таче 55–85% высоты экрана, с мышью 35–65%. Стили `[data-lifted]` те же, что у ховера, поэтому «поднята» – одно состояние, источники не складываются. Сейчас `data-scroll-lift` у `Button`, CTA карточки модели, таблеток и карточек-ссылок интересов. Кнопки, вошедшие в зону разом (ряд), поднимаются по очереди слева направо с шагом `--lift-stagger` (0.25 с). Под `prefers-reduced-motion` скрипт ничего не делает.
 
 ## About (бенто-сетка интересов)
 - Секция `src/components/sections/About.astro`, якорь `#about`. Заголовок, кнопка и число видимых карточек в `src/data/about.ts`.
 - Карточки в `src/data/interests.json`, схема в `src/content.config.ts` (коллекция `interests`). Порядок в файле = порядок в сетке.
-- Поля карточки: `size` (intro / wide / square / tall), `theme` (цвет `--color-interest-*`), `image` и `imageAlt` (нет картинки – рисуется шаблон), `framed` (чёрная рамка), `href` (есть – карточка-ссылка со стрелкой в углу).
+- Поля карточки: `size` (intro / wide / square / tall), `theme` (цвет `--color-interest-*`), `image` и `imageAlt` (нет картинки – рисуется шаблон), `framed` (чёрная рамка), `href` (есть – карточка-ссылка со стрелкой в углу). Правило: только у карточек-ссылок есть подъём на ховере и при прокрутке (`data-scroll-lift`), цвет при этом не меняется; карточки без своей страницы стоят на месте. Пока карточка спрятана под «Показать ещё», она не поднимается.
 - Картинки в `src/assets/interests/`. У Чайной, Таблиц, 3D Галереи и Фильмецов пока шаблоны, цвета нижнего ряда временные.
 - Десктоп: сетка 494 / 356 / 356 из макета, высота ряда считается от ширины (`cqi`). Нижний ряд с `tall` – отдельная сетка из трёх колонок.
 - Планшет (≤900px) – две колонки, телефон (≤600px) – одна. На телефоне фото длинной карточки 16:10 во всю ширину, квадратное фото той же высоты (ширина 10/16), квадратная карточка по высоте содержимого.

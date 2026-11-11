@@ -21,6 +21,7 @@ const Tag = href ? 'a' : 'div';
   href={href}
   style={`--interest-bg: var(--color-interest-${theme})`}
   data-interest
+  data-scroll-lift={href ? '' : undefined}
 >
   <div class:list={['interest__media', { 'interest__media--framed': framed }]}>
     {image ? (
@@ -180,7 +181,9 @@ const Tag = href ? 'a' : 'div';
     stroke-linejoin: round;
   }
 
-  a.interest:focus-visible {
+  /* поднята: наведение, фокус или прокрутка (data-lifted ставит scroll-lift.ts) – одно состояние, только у ссылок */
+  a.interest:focus-visible,
+  a.interest[data-lifted] {
     transform: translateY(var(--lift-hover));
     border-color: var(--color-black);
     box-shadow: var(--shadow-lift);
@@ -200,7 +203,8 @@ const Tag = href ? 'a' : 'div';
     .interest { transition: none; }
 
     a.interest:hover,
-    a.interest:focus-visible {
+    a.interest:focus-visible,
+    a.interest[data-lifted] {
       transform: none;
     }
   }
