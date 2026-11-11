@@ -107,6 +107,11 @@ export default function WallBuilder() {
   const [favNote, setFavNote] = useState('');
   const [renaming, setRenaming] = useState<string | null>(null);
   const [armed, setArmed] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  // раскрытие доехало до конца: можно не обрезать содержимое
+  const [settled, setSettled] = useState(false);
+  const body = useRef<HTMLDivElement>(null);
+  const openTimer = useRef<number>(undefined);
 
   const wall = useMemo(() => makeWall(W, H), [W, H]);
   const max = useMemo(() => wall.maxLayout().length, [wall]);
@@ -144,9 +149,9 @@ export default function WallBuilder() {
     if (loaded.current) writeJson(STATE_KEY, { W, H, frames: frames.map(({ o, i, j }) => ({ o, i, j })) });
   }, [W, H, frames]);
 
-  // сколько раскладок находится и какие стили складываются – после паузы, это сотни попыток
+  // сколько раскладок находится и какие стили складываются – после паузы, это сотни попыток;
+  // пока считаем, видно прошлое число, новое докручивается барабаном
   useEffect(() => {
-    setUnique(null);
     const timer = window.setTimeout(() => {
       const count = n || Math.min(builderWall.frames, max);
       setUnique(wall.countUnique(count, COUNT_BUDGET));
@@ -158,6 +163,17 @@ export default function WallBuilder() {
   }, [wall, n, max]);
 
   // --- действия ---
+
+  function toggleOpen() {
+    const next = !open;
+    setOpen(next);
+    setSettled(false);
+    clearTimeout(openTimer.current);
+    if (!next || !body.current) return;
+    // transitionend приходит не всегда (вкладка в фоне, движение выключено), поэтому по таймеру
+    const ms = parseFloat(getComputedStyle(body.current).transitionDuration) * 1000 || 0;
+    openTimer.current = window.setTimeout(() => setSettled(true), ms + 50);
+  }
 
   function randomize(choice = style, count = n || Math.min(builderWall.frames, max)) {
     if (!max) return setNote({ text: t.noRoom, warn: true });
@@ -373,7 +389,7 @@ export default function WallBuilder() {
     [String(wall.nx * wall.ny), t.statDots(wall.nx, wall.ny)],
     [`${fmt(wall.s)}×${fmt(wall.s)}`, t.statMagnets],
     [`${pv} / ${wall.places.length - pv}`, t.statPlaces],
-    [unique == null ? '…' : `${unique.partial ? '≥ ' : ''}${unique.count}`, t.statUnique(n || Math.min(builderWall.frames, max))],
+    [unique == null ? '0' : `${unique.partial ? '≥ ' : ''}${unique.count}`, t.statUnique(n || Math.min(builderWall.frames, max))],
     [String(n), t.statFrames(used.size)],
     [box ? `${fmt(box.x2 - box.x)}×${fmt(box.y2 - box.y)}` : '–', t.statSize],
   ];
@@ -383,188 +399,216 @@ export default function WallBuilder() {
       <div className="builder__head">
         <h2 className="builder__title">{t.title}</h2>
         <p className="builder__lead">{t.lead}</p>
-      </div>
-
-      <div className="builder__panel">
-        <div className="builder__stage">
-          <Stepper
-            className="builder__size builder__size--height"
-            label={t.height}
-            value={H}
-            min={builderWall.minHeight}
-            max={builderWall.maxHeight}
-            plus={t.taller}
-            minus={t.shorter}
-            onChange={(v) => resize(W, v)}
-            vertical
-          />
-          <div className="builder__wall" style={{ '--wall-width': W } as CSSProperties}>
-            <div className="builder__canvas">
-              <svg
-                ref={svg}
-                className="builder__svg"
-                viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`}
-                role="img"
-                aria-label={`${t.wallLabel}: ${W}×${H} ${t.cm}, ${n}`}
-                onPointerDown={onPointerDown}
-                onPointerMove={onPointerMove}
-                onPointerUp={onPointerUp}
-                onPointerCancel={() => (drag.current = null)}
-              >
-                <rect x={0} y={0} width={W} height={H} rx={1} className="builder__area" />
-                <g>{dots}</g>
-                {frames.map((f) => {
-                  const r = wall.rect(f);
-                  return (
-                    <g key={f.id} data-frame={f.id} className="builder__frame" aria-selected={f.id === sel}>
-                      <rect x={r.x} y={r.y} width={r.w} height={r.h} rx={0.5} className="builder__frame-body" />
-                      <rect
-                        x={r.x + 1.2}
-                        y={r.y + 1.2}
-                        width={r.w - 2.4}
-                        height={r.h - 2.4}
-                        className={`builder__frame-photo builder__frame-photo--${f.o}`}
-                      />
-                      {wall.magnets(f).map(([i, j]) => {
-                        const [x, y] = wall.dot(i, j);
-                        return <circle key={`${i},${j}`} cx={x} cy={y} r={0.75} className="builder__magnet" />;
-                      })}
-                    </g>
-                  );
-                })}
-              </svg>
-              {selFrame && (
-                <FrameTools
-                  rect={wall.rect(selFrame)}
-                  vb={vb}
-                  onRotate={() => rotate(selFrame.id)}
-                  onRemove={() => removeFrame(selFrame.id)}
-                />
-              )}
-            </div>
-          </div>
-          <Stepper
-            className="builder__size builder__size--width"
-            label={t.width}
-            value={W}
-            min={builderWall.minWidth}
-            max={builderWall.maxWidth}
-            plus={t.longer}
-            minus={t.narrower}
-            onChange={(v) => resize(v, H)}
-          />
-        </div>
-      </div>
-
-      <div className="builder__controls">
-        <div className="builder__counter" role="group" aria-label={t.framesLabel}>
-          <span className="builder__counter-label">{t.framesLabel}</span>
-          <button type="button" className="builder__round" aria-label={t.removeFrame} disabled={!n} onClick={() => removeFrame()}>
-            −
-          </button>
-          <output className="builder__count" aria-live="polite">
-            {n} <span>{t.framesOf(max)}</span>
-          </output>
-          <button type="button" className="builder__round" aria-label={t.addFrame} disabled={n >= max} onClick={addFrame}>
-            +
-          </button>
-        </div>
-
-        <div className="case-tabs builder__styles" role="group" aria-label={t.stylesLabel}>
-          {builderStyles.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              className="case-tabs__pill"
-              data-scroll-lift
-              aria-pressed={s.id === style}
-              data-blocked={s.id !== 'any' && blocked.has(s.id) ? '' : undefined}
-              onClick={() => pickStyle(s.id)}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-
-        <button type="button" className="builder__go" data-scroll-lift onClick={() => randomize()}>
-          {t.randomize}
+        <button
+          type="button"
+          className="builder__toggle"
+          data-scroll-lift
+          aria-expanded={open}
+          aria-controls="builder-body"
+          onClick={toggleOpen}
+        >
+          {open ? t.close : t.open}
+          <svg viewBox="0 0 16 10" aria-hidden="true">
+            <path d="M2 2l6 6 6-6" />
+          </svg>
         </button>
       </div>
 
-      <p className="builder__note" data-warn={shownNote?.warn ? '' : undefined} aria-live="polite" hidden={!shownNote}>
-        {shownNote?.text}
-      </p>
-
-      <ul className="builder__stats">
-        {stats.map(([value, label]) => (
-          <li key={label} className="builder__stat">
-            <b>{value}</b>
-            <span>{label}</span>
-          </li>
-        ))}
-      </ul>
-
-      <details className="builder__favs">
-        <summary className="builder__favs-summary">
-          {t.favTitle} <span>({favs.length})</span>
-        </summary>
-        <div className="builder__favs-body">
-          <div className="builder__favs-add">
-            <input
-              className="builder__input"
-              value={favName}
-              placeholder={t.favName}
-              maxLength={60}
-              onChange={(e) => setFavName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addFav()}
-            />
-            <button type="button" className="builder__small builder__small--accent" disabled={!n} onClick={addFav}>
-              ★ {t.favSave}
-            </button>
-            <span className="builder__favs-note">{favNote || t.favNote}</span>
-          </div>
-          {favs.length ? (
-            <ul className="builder__favs-list">
-              {favs.map((fav) => (
-                <li key={fav.id} className="builder__fav">
-                  <button type="button" className="builder__fav-preview" aria-label={`${t.favApply}: ${fav.name}`} onClick={() => applyFav(fav)}>
-                    <Mini fav={fav} />
-                  </button>
-                  {renaming === fav.id ? (
-                    <input
-                      className="builder__input"
-                      defaultValue={fav.name}
-                      maxLength={60}
-                      autoFocus
-                      onBlur={(e) => renameFav(fav, e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') renameFav(fav, e.currentTarget.value);
-                        if (e.key === 'Escape') setRenaming(null);
-                      }}
+      {/* свёрнут, пока не нажали: высота 0fr → 1fr, после раскрытия обрезка снимается, чтобы были видны тени */}
+      <div
+        id="builder-body"
+        className="builder__body"
+        data-open={open ? '' : undefined}
+        data-settled={settled ? '' : undefined}
+        inert={!open}
+        ref={body}
+      >
+        <div className="builder__body-inner">
+          <div className="builder__panel">
+            <div className="builder__stage">
+              <Stepper
+                className="builder__size builder__size--height"
+                label={t.height}
+                value={H}
+                min={builderWall.minHeight}
+                max={builderWall.maxHeight}
+                plus={t.taller}
+                minus={t.shorter}
+                onChange={(v) => resize(W, v)}
+                vertical
+              />
+              <div className="builder__wall" style={{ '--wall-width': W } as CSSProperties}>
+                <div className="builder__canvas">
+                  <svg
+                    ref={svg}
+                    className="builder__svg"
+                    viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`}
+                    role="img"
+                    aria-label={`${t.wallLabel}: ${W}×${H} ${t.cm}, ${n}`}
+                    onPointerDown={onPointerDown}
+                    onPointerMove={onPointerMove}
+                    onPointerUp={onPointerUp}
+                    onPointerCancel={() => (drag.current = null)}
+                  >
+                    <rect x={0} y={0} width={W} height={H} rx={1} className="builder__area" />
+                    <g>{dots}</g>
+                    {frames.map((f) => {
+                      const r = wall.rect(f);
+                      return (
+                        <g key={f.id} data-frame={f.id} className="builder__frame" aria-selected={f.id === sel}>
+                          <rect x={r.x} y={r.y} width={r.w} height={r.h} rx={0.5} className="builder__frame-body" />
+                          <rect
+                            x={r.x + 1.2}
+                            y={r.y + 1.2}
+                            width={r.w - 2.4}
+                            height={r.h - 2.4}
+                            className={`builder__frame-photo builder__frame-photo--${f.o}`}
+                          />
+                          {wall.magnets(f).map(([i, j]) => {
+                            const [x, y] = wall.dot(i, j);
+                            return <circle key={`${i},${j}`} cx={x} cy={y} r={0.75} className="builder__magnet" />;
+                          })}
+                        </g>
+                      );
+                    })}
+                  </svg>
+                  {selFrame && (
+                    <FrameTools
+                      rect={wall.rect(selFrame)}
+                      vb={vb}
+                      onRotate={() => rotate(selFrame.id)}
+                      onRemove={() => removeFrame(selFrame.id)}
                     />
-                  ) : (
-                    <b className="builder__fav-name">{fav.name}</b>
                   )}
-                  <span className="builder__fav-meta">{t.favMeta(fav.frames.length, fav.W, fav.H)}</span>
-                  <div className="builder__fav-actions">
-                    <button type="button" className="builder__small builder__small--accent" onClick={() => applyFav(fav)}>
-                      {t.favApply}
-                    </button>
-                    <button type="button" className="builder__small" onClick={() => setRenaming(fav.id)}>
-                      {t.favRename}
-                    </button>
-                    <button type="button" className="builder__small" onClick={() => deleteFav(fav)}>
-                      {armed === fav.id ? t.favDeleteConfirm : t.favDelete}
-                    </button>
-                  </div>
-                </li>
+                </div>
+              </div>
+              <Stepper
+                className="builder__size builder__size--width"
+                label={t.width}
+                value={W}
+                min={builderWall.minWidth}
+                max={builderWall.maxWidth}
+                plus={t.longer}
+                minus={t.narrower}
+                onChange={(v) => resize(v, H)}
+              />
+            </div>
+          </div>
+
+          <div className="builder__controls">
+            <div className="builder__counter" role="group" aria-label={t.framesLabel}>
+              <span className="builder__counter-label">{t.framesLabel}</span>
+              <button type="button" className="builder__round" aria-label={t.removeFrame} disabled={!n} onClick={() => removeFrame()}>
+                −
+              </button>
+              <output className="builder__count" aria-live="polite">
+                {n} <span>{t.framesOf(max)}</span>
+              </output>
+              <button type="button" className="builder__round" aria-label={t.addFrame} disabled={n >= max} onClick={addFrame}>
+                +
+              </button>
+            </div>
+
+            <div className="case-tabs builder__styles" role="group" aria-label={t.stylesLabel}>
+              {builderStyles.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  className="case-tabs__pill"
+                  data-scroll-lift
+                  aria-pressed={s.id === style}
+                  data-blocked={s.id !== 'any' && blocked.has(s.id) ? '' : undefined}
+                  onClick={() => pickStyle(s.id)}
+                >
+                  {s.label}
+                </button>
               ))}
-            </ul>
-          ) : (
-            <p className="builder__favs-empty">{t.favEmpty}</p>
-          )}
+            </div>
+
+            <button type="button" className="builder__go" data-scroll-lift onClick={() => randomize()}>
+              {t.randomize}
+            </button>
+          </div>
+
+          <p className="builder__note" data-warn={shownNote?.warn ? '' : undefined} aria-live="polite" hidden={!shownNote}>
+            {shownNote?.text}
+          </p>
+
+          <ul className="builder__stats">
+            {stats.map(([value, label], index) => (
+              // ключ по месту, а не по подписи: подпись меняется вместе с числом, а барабан должен остаться
+              <li key={index} className="builder__stat">
+                <b>
+                  <Roll value={value} />
+                </b>
+                <span>{label}</span>
+              </li>
+            ))}
+          </ul>
+
+          <details className="builder__favs">
+            <summary className="builder__favs-summary">
+              {t.favTitle} <span>({favs.length})</span>
+            </summary>
+            <div className="builder__favs-body">
+              <div className="builder__favs-add">
+                <input
+                  className="builder__input"
+                  value={favName}
+                  placeholder={t.favName}
+                  maxLength={60}
+                  onChange={(e) => setFavName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && addFav()}
+                />
+                <button type="button" className="builder__small builder__small--accent" disabled={!n} onClick={addFav}>
+                  ★ {t.favSave}
+                </button>
+                <span className="builder__favs-note">{favNote || t.favNote}</span>
+              </div>
+              {favs.length ? (
+                <ul className="builder__favs-list">
+                  {favs.map((fav) => (
+                    <li key={fav.id} className="builder__fav">
+                      <button type="button" className="builder__fav-preview" aria-label={`${t.favApply}: ${fav.name}`} onClick={() => applyFav(fav)}>
+                        <Mini fav={fav} />
+                      </button>
+                      {renaming === fav.id ? (
+                        <input
+                          className="builder__input"
+                          defaultValue={fav.name}
+                          maxLength={60}
+                          autoFocus
+                          onBlur={(e) => renameFav(fav, e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') renameFav(fav, e.currentTarget.value);
+                            if (e.key === 'Escape') setRenaming(null);
+                          }}
+                        />
+                      ) : (
+                        <b className="builder__fav-name">{fav.name}</b>
+                      )}
+                      <span className="builder__fav-meta">{t.favMeta(fav.frames.length, fav.W, fav.H)}</span>
+                      <div className="builder__fav-actions">
+                        <button type="button" className="builder__small builder__small--accent" onClick={() => applyFav(fav)}>
+                          {t.favApply}
+                        </button>
+                        <button type="button" className="builder__small" onClick={() => setRenaming(fav.id)}>
+                          {t.favRename}
+                        </button>
+                        <button type="button" className="builder__small" onClick={() => deleteFav(fav)}>
+                          {armed === fav.id ? t.favDeleteConfirm : t.favDelete}
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="builder__favs-empty">{t.favEmpty}</p>
+              )}
+            </div>
+          </details>
         </div>
-      </details>
+      </div>
     </div>
   );
 }
@@ -649,6 +693,46 @@ function Stepper(props: {
     </div>
   );
 }
+
+// число барабанами, как в игровом автомате: каждая цифра прокручивается к новой, остальные знаки стоят
+function Roll({ value }: { value: string }) {
+  const chars = [...value];
+  return (
+    <span className="roll" aria-label={value}>
+      {chars.map((ch, index) => {
+        // ключ считаем с конца, чтобы при «9 → 10» единицы остались тем же барабаном
+        const key = chars.length - index;
+        return /\d/.test(ch) ? (
+          <Reel key={key} digit={+ch} order={index} />
+        ) : (
+          <span key={`${key}${ch}`} className="roll__char" aria-hidden="true">
+            {ch}
+          </span>
+        );
+      })}
+    </span>
+  );
+}
+
+function Reel({ digit, order }: { digit: number; order: number }) {
+  // новый барабан появляется на нуле и сразу крутится к своей цифре
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setShown(digit));
+    return () => cancelAnimationFrame(frame);
+  }, [digit]);
+  return (
+    <span className="roll__reel" aria-hidden="true">
+      <span className="roll__strip" style={{ '--roll-digit': shown, '--roll-order': order } as CSSProperties}>
+        {DIGITS.map((d) => (
+          <span key={d}>{d}</span>
+        ))}
+      </span>
+    </span>
+  );
+}
+
+const DIGITS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 // плашка над выбранной рамкой: повернуть и убрать
 function FrameTools(props: {

@@ -1,8 +1,8 @@
 .builder {
   --builder-gap: clamp(16px, 2.4vw, 28px);
   --builder-gap-sm: clamp(8px, 1vw, 12px);
-  --builder-panel-padding: clamp(16px, 3vw, 40px);
-  --builder-panel-shadow-space: 13px; /* слева и сверху больше: там тень внутрь */
+  --builder-panel-padding: clamp(18px, 3vw, 40px);
+  --builder-frame-ring: clamp(6px, 0.8vw, 10px); /* тёмный багет по краю панели */
   --builder-round-size: 36px;
   --builder-input-width: 64px;
   --builder-tool-size: 32px;
@@ -10,8 +10,9 @@
   --builder-wall-max-height: 70vh;
   --builder-cm-min: 0px; /* на телефоне стена не уже стольких px на сантиметр и листается вбок */
   --builder-fav-width: 230px;
+  --builder-open-time: 0.5s;
+  --builder-bleed: 8px; /* запас под тени поднятых кнопок, пока тело обрезано */
   --builder-fav-preview-height: 120px;
-  --builder-glass-blur: 1px;
 
   display: flex;
   flex-direction: column;
@@ -27,7 +28,7 @@
 }
 
 .builder__title {
-  color: var(--color-accent);
+  color: var(--color-text-inverse);
   font-size: var(--fs-h2);
   font-weight: var(--fw-black);
   line-height: 1.1;
@@ -35,19 +36,102 @@
 }
 
 .builder__lead {
+  color: var(--color-text);
   font-size: var(--fs-card-text);
   font-weight: var(--fw-medium);
 }
 
-/* панель как у Hero: стекло, чёрная обводка и тень внутрь */
+/* кнопка раскрытия – как Button сайта, стрелка переворачивается */
+.builder__toggle {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 12px;
+  margin-top: var(--builder-gap-sm);
+  padding: calc(16px - var(--stroke-lift)) calc(25px - var(--stroke-lift));
+  border: var(--stroke-lift) solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--color-button);
+  color: var(--color-black);
+  font-family: var(--font-main);
+  font-size: var(--fs-button);
+  font-weight: var(--fw-semibold);
+  line-height: 1.2;
+  cursor: pointer;
+  transition: transform var(--transition-lift), box-shadow var(--transition-lift), border-color var(--transition-lift);
+}
+
+.builder__toggle svg {
+  width: 0.8em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform var(--builder-open-time) ease;
+}
+
+.builder__toggle[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+
+.builder__toggle:focus-visible,
+.builder__toggle[data-lifted] {
+  background: var(--color-accent);
+  transform: translateY(var(--lift-hover));
+  border-color: var(--color-black);
+  box-shadow: var(--shadow-lift);
+  outline: none;
+}
+
+/* тело конструктора: свёрнуто в 0, раскрывается по высоте */
+.builder__body {
+  display: grid;
+  grid-template-rows: 0fr;
+  margin-top: calc(-1 * var(--builder-gap));
+  transition:
+    grid-template-rows var(--builder-open-time) ease,
+    margin-top var(--builder-open-time) ease;
+}
+
+.builder__body[data-open] {
+  grid-template-rows: 1fr;
+  margin-top: 0;
+}
+
+.builder__body-inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--builder-gap);
+  min-height: 0;
+  overflow: hidden;
+  /* место под тени кнопок, которые иначе обрезались бы во время раскрытия */
+  padding: 0 var(--builder-bleed) var(--builder-bleed) 0;
+  margin: 0 calc(-1 * var(--builder-bleed)) calc(-1 * var(--builder-bleed)) 0;
+}
+
+/* свёрнутое прячется целиком (иначе в запасе под тени видна кромка панели), но только когда доедет */
+.builder__body-inner {
+  visibility: hidden;
+  transition: visibility 0s linear var(--builder-open-time);
+}
+
+.builder__body[data-open] .builder__body-inner {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.builder__body[data-settled] .builder__body-inner {
+  overflow: visible;
+}
+
+/* стена в рамке: тёмный багет по краю и чёрная обводка, без тени */
 .builder__panel {
-  padding: calc(var(--builder-panel-padding) + var(--builder-panel-shadow-space)) var(--builder-panel-padding)
-    var(--builder-panel-padding) calc(var(--builder-panel-padding) + var(--builder-panel-shadow-space));
+  padding: calc(var(--builder-panel-padding) + var(--builder-frame-ring));
   border: var(--stroke-panel) solid var(--color-black);
-  border-radius: var(--radius-panel);
-  background: var(--color-hero-glass);
-  backdrop-filter: blur(var(--builder-glass-blur));
-  box-shadow: var(--shadow-panel-inset);
+  border-radius: var(--radius-card-sm);
+  background: var(--color-deep);
+  box-shadow: inset 0 0 0 var(--builder-frame-ring) var(--color-dark);
 }
 
 /* высота слева от стены, длина под ней */
@@ -331,9 +415,45 @@
   line-height: 1.2;
 }
 
-.builder__stat span {
+.builder__stat > span {
   font-size: var(--fs-player-label);
   opacity: 0.8;
+}
+
+/* число барабанами: лента 0–9 сдвигается к нужной цифре, правые крутятся дольше, как в автомате */
+.roll {
+  --roll-line: 1.2em;
+  --roll-time: 0.7s;
+  --roll-step: 0.06s;
+
+  display: inline-flex;
+  height: var(--roll-line);
+  line-height: var(--roll-line);
+  font-variant-numeric: tabular-nums;
+}
+
+.roll__reel {
+  display: inline-block;
+  overflow: hidden;
+  height: var(--roll-line);
+}
+
+.roll__strip {
+  display: flex;
+  flex-direction: column;
+  transform: translateY(calc(var(--roll-digit) * var(--roll-line) * -1));
+  transition: transform var(--roll-time) cubic-bezier(0.2, 0.9, 0.25, 1.15);
+  transition-delay: calc(var(--roll-order) * var(--roll-step));
+}
+
+.roll__char {
+  white-space: pre;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roll__strip {
+    transition: none;
+  }
 }
 
 /* избранное: свёрнуто, чтобы не мешать */
@@ -451,7 +571,8 @@
     box-shadow: var(--shadow-lift-sm);
   }
 
-  .builder__go:hover {
+  .builder__go:hover,
+  .builder__toggle:hover {
     background: var(--color-accent);
     transform: translateY(var(--lift-hover));
     border-color: var(--color-black);
@@ -461,10 +582,17 @@
 
 @media (prefers-reduced-motion: reduce) {
   .builder__go,
-  .builder__round {
+  .builder__round,
+  .builder__toggle,
+  .builder__toggle svg,
+  .builder__body,
+  .builder__body-inner {
     transition: none;
   }
 
+  .builder__toggle:hover,
+  .builder__toggle:focus-visible,
+  .builder__toggle[data-lifted],
   .builder__go:hover,
   .builder__go:focus-visible,
   .builder__go[data-lifted],
@@ -476,7 +604,6 @@
 
 @media (max-width: 720px) {
   .builder {
-    --builder-panel-shadow-space: 8px;
     --builder-cm-min: 4px;
   }
 
