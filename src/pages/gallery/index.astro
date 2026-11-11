@@ -1,0 +1,39 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Section from '@/components/layout/Section.astro';
+import BackLink from '@/components/ui/BackLink.astro';
+import { galleryBackHref, galleryBackLabel, galleryDescription, galleryTitle } from '@/data/gallery';
+---
+<Layout title={galleryTitle} description={galleryDescription}>
+  <Section>
+    <div class="gallery">
+      <BackLink href={galleryBackHref} label={galleryBackLabel} />
+
+      <!-- пустая панель под будущую шапку страницы -->
+      <div class="gallery__intro"></div>
+    </div>
+  </Section>
+</Layout>
+
+<style>
+  .gallery {
+    --gallery-gap: clamp(20px, 3vw, 40px);
+    --gallery-intro-height: clamp(280px, 40vw, 520px);
+    --gallery-glass-blur: 1px;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--gallery-gap);
+    color: var(--color-text-inverse);
+  }
+
+  /* рамка как у панели Hero: стекло, чёрная обводка и тень внутрь */
+  .gallery__intro {
+    min-height: var(--gallery-intro-height);
+    border: var(--stroke-panel) solid var(--color-black);
+    border-radius: var(--radius-panel);
+    background: var(--color-hero-glass);
+    backdrop-filter: blur(var(--gallery-glass-blur));
+    box-shadow: var(--shadow-panel-inset);
+  }
+</style>

@@ -1,0 +1,50 @@
+---
+// ссылка «назад» со стрелкой над содержимым внутренних страниц
+interface Props {
+  href: string;
+  label: string;
+}
+
+const { href, label } = Astro.props;
+---
+<a class="back-link" href={href}>
+  <svg viewBox="0 0 10 16" aria-hidden="true"><path d="M8 2 2 8l6 6" /></svg>
+  {label}
+</a>
+
+<style>
+  .back-link {
+    --back-link-arrow: 0.75em;
+    --back-link-stroke: 2.5px;
+    --back-link-gap: clamp(5px, 0.6vw, 7px);
+
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: var(--back-link-gap);
+    color: inherit;
+    font-size: var(--fs-hint);
+    font-weight: var(--fw-semibold);
+    text-decoration: none;
+  }
+
+  .back-link:focus-visible {
+    color: var(--color-accent);
+  }
+
+  @media (hover: hover) {
+    .back-link:hover {
+      color: var(--color-accent);
+    }
+  }
+
+  .back-link svg {
+    width: var(--back-link-arrow);
+    height: var(--back-link-arrow);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: var(--back-link-stroke);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+</style>

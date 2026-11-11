@@ -43,7 +43,8 @@
     "image": "../assets/interests/gallery.png",
     "imageAlt": "Глиняные горшки на заборе в сосновом лесу",
     "size": "wide",
-    "theme": "forest"
+    "theme": "forest",
+    "href": "/gallery/"
   },
   {
     "id": "films",
