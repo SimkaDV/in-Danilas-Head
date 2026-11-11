@@ -109,6 +109,15 @@
   --color-interest-placeholder: rgba(255, 255, 255, 0.18);
   --color-interest-placeholder-stroke: rgba(255, 255, 255, 0.55);
 
+  /* галерея: конструктор стены с рамками */
+  --color-wall: rgba(255, 255, 255, 0.08);
+  --color-wall-stroke: rgba(255, 255, 255, 0.45);
+  --color-wall-dot: rgba(255, 255, 255, 0.5);
+  --color-frame: var(--color-dark);
+  --color-frame-v: var(--color-info); /* «фото» в вертикальной рамке */
+  --color-frame-h: var(--color-interest-grass); /* и в горизонтальной */
+  --color-magnet: var(--color-accent);
+
   --font-main: 'Rubik Variable', system-ui, sans-serif;
   --fw-regular: 400;
   --fw-medium: 500;

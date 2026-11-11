@@ -2,6 +2,7 @@
 import Layout from '@/layouts/Layout.astro';
 import Section from '@/components/layout/Section.astro';
 import BackLink from '@/components/ui/BackLink.astro';
+import WallBuilder from '@/components/islands/WallBuilder';
 import { galleryBackHref, galleryBackLabel, galleryDescription, galleryTitle } from '@/data/gallery';
 ---
 <Layout title={galleryTitle} description={galleryDescription}>
@@ -11,6 +12,8 @@ import { galleryBackHref, galleryBackLabel, galleryDescription, galleryTitle } f
 
       <!-- пустая панель под будущую шапку страницы -->
       <div class="gallery__intro"></div>
+
+      <WallBuilder client:visible />
     </div>
   </Section>
 </Layout>

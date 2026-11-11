@@ -1,0 +1,534 @@
+.builder {
+  --builder-gap: clamp(16px, 2.4vw, 28px);
+  --builder-gap-sm: clamp(8px, 1vw, 12px);
+  --builder-panel-padding: clamp(16px, 3vw, 40px);
+  --builder-panel-shadow-space: 13px; /* слева и сверху больше: там тень внутрь */
+  --builder-round-size: 36px;
+  --builder-input-width: 64px;
+  --builder-tool-size: 32px;
+  --builder-card-padding: clamp(12px, 1.4vw, 18px);
+  --builder-wall-max-height: 70vh;
+  --builder-cm-min: 0px; /* на телефоне стена не уже стольких px на сантиметр и листается вбок */
+  --builder-fav-width: 230px;
+  --builder-fav-preview-height: 120px;
+  --builder-glass-blur: 1px;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--builder-gap);
+  color: var(--color-text-inverse);
+}
+
+.builder__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--builder-gap-sm);
+  max-width: 760px;
+}
+
+.builder__title {
+  color: var(--color-accent);
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-black);
+  line-height: 1.1;
+  text-shadow: var(--shadow-title);
+}
+
+.builder__lead {
+  font-size: var(--fs-card-text);
+  font-weight: var(--fw-medium);
+}
+
+/* панель как у Hero: стекло, чёрная обводка и тень внутрь */
+.builder__panel {
+  padding: calc(var(--builder-panel-padding) + var(--builder-panel-shadow-space)) var(--builder-panel-padding)
+    var(--builder-panel-padding) calc(var(--builder-panel-padding) + var(--builder-panel-shadow-space));
+  border: var(--stroke-panel) solid var(--color-black);
+  border-radius: var(--radius-panel);
+  background: var(--color-hero-glass);
+  backdrop-filter: blur(var(--builder-glass-blur));
+  box-shadow: var(--shadow-panel-inset);
+}
+
+/* высота слева от стены, длина под ней */
+.builder__stage {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    'height wall'
+    '. width';
+  align-items: center;
+  gap: var(--builder-gap-sm);
+}
+
+.builder__wall {
+  grid-area: wall;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.builder__canvas {
+  position: relative;
+  min-width: calc(var(--wall-width) * var(--builder-cm-min));
+}
+
+.builder__svg {
+  width: 100%;
+  max-height: var(--builder-wall-max-height);
+  user-select: none;
+}
+
+.builder__area {
+  fill: var(--color-wall);
+  stroke: var(--color-wall-stroke);
+  stroke-width: 0.25;
+}
+
+.builder__dot {
+  fill: var(--color-wall-dot);
+}
+
+.builder__frame {
+  cursor: grab;
+  touch-action: none;
+}
+
+.builder__frame:active {
+  cursor: grabbing;
+}
+
+.builder__frame-body {
+  fill: var(--color-frame);
+}
+
+.builder__frame[aria-selected='true'] .builder__frame-body {
+  stroke: var(--color-accent);
+  stroke-width: 0.9;
+}
+
+.builder__frame-photo--v {
+  fill: var(--color-frame-v);
+}
+
+.builder__frame-photo--h {
+  fill: var(--color-frame-h);
+}
+
+.builder__magnet {
+  fill: var(--color-magnet);
+  pointer-events: none;
+}
+
+/* плашка с действиями по центру выбранной рамки */
+.builder__tools {
+  position: absolute;
+  display: flex;
+  gap: 4px;
+  transform: translate(-50%, -50%);
+}
+
+.builder__tool {
+  display: grid;
+  place-items: center;
+  width: var(--builder-tool-size);
+  height: var(--builder-tool-size);
+  padding: 0;
+  border: var(--stroke-lift) solid var(--color-black);
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: var(--color-black);
+  cursor: pointer;
+  box-shadow: var(--shadow-lift-sm);
+}
+
+.builder__tool svg {
+  width: 55%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* размеры стены */
+.builder__size {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  border-radius: var(--radius-card-sm);
+  background: var(--color-dark);
+}
+
+.builder__size[data-vertical] {
+  grid-area: height;
+  flex-direction: column;
+}
+
+.builder__size--width {
+  grid-area: width;
+  justify-self: center;
+}
+
+.builder__size-label {
+  font-size: var(--fs-player-label);
+  opacity: 0.75;
+}
+
+.builder__input {
+  min-width: 0;
+  padding: 6px 10px;
+  border: var(--stroke-lift) solid var(--color-black);
+  border-radius: var(--radius-card-sm);
+  background: var(--color-text-inverse);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: var(--fw-semibold);
+}
+
+.builder__size-input {
+  width: var(--builder-input-width);
+  text-align: center;
+}
+
+/* круглые ± у размеров и счётчика */
+.builder__round {
+  display: grid;
+  place-items: center;
+  width: var(--builder-round-size);
+  height: var(--builder-round-size);
+  padding: 0;
+  border: var(--stroke-lift) solid var(--color-black);
+  border-radius: 50%;
+  background: var(--color-button);
+  color: var(--color-black);
+  font: inherit;
+  font-size: 22px;
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  transition: transform var(--transition-lift), box-shadow var(--transition-lift), background var(--transition-lift);
+}
+
+.builder__round:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.builder__round:not(:disabled):focus-visible {
+  background: var(--color-accent);
+  transform: translateY(var(--lift-hover-sm));
+  box-shadow: var(--shadow-lift-sm);
+  outline: none;
+}
+
+/* панель под стеной: счётчик, стили, кнопка */
+.builder__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--builder-gap-sm) var(--builder-gap);
+}
+
+.builder__counter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px 6px 18px;
+  border-radius: var(--radius-pill);
+  background: var(--color-dark);
+}
+
+.builder__counter-label {
+  font-weight: var(--fw-semibold);
+}
+
+.builder__count {
+  min-width: 4.5em;
+  font-size: var(--fs-button);
+  font-weight: var(--fw-bold);
+  text-align: center;
+}
+
+.builder__count span {
+  font-size: var(--fs-player-label);
+  font-weight: var(--fw-medium);
+  opacity: 0.75;
+}
+
+/* стиль, который на этой стене не складывается, бледный, но нажать можно – скажем почему */
+.builder__styles .case-tabs__pill[data-blocked] {
+  opacity: 0.4;
+}
+
+/* главная кнопка – как Button сайта */
+.builder__go {
+  padding: calc(16px - var(--stroke-lift)) calc(25px - var(--stroke-lift));
+  border: var(--stroke-lift) solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--color-button);
+  color: var(--color-black);
+  font-family: var(--font-main);
+  font-size: var(--fs-button);
+  font-weight: var(--fw-semibold);
+  line-height: 1.2;
+  cursor: pointer;
+  transition: transform var(--transition-lift), box-shadow var(--transition-lift), border-color var(--transition-lift);
+}
+
+.builder__go:focus-visible,
+.builder__go[data-lifted] {
+  background: var(--color-accent);
+  transform: translateY(var(--lift-hover));
+  border-color: var(--color-black);
+  box-shadow: var(--shadow-lift);
+  outline: none;
+}
+
+/* подсказка в стиле подсказок каталога */
+.builder__note {
+  align-self: flex-start;
+  max-width: 640px;
+  padding: 10px 16px;
+  border-radius: var(--radius-card-sm);
+  background: var(--color-info);
+  box-shadow: var(--shadow-sticker);
+  color: var(--color-text);
+  font-size: var(--fs-hint);
+  font-weight: var(--fw-semibold);
+}
+
+.builder__note[hidden] {
+  display: none;
+}
+
+.builder__note[data-warn] {
+  background: var(--color-accent);
+}
+
+/* цифры */
+.builder__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--builder-gap-sm);
+  padding: 0;
+  list-style: none;
+}
+
+.builder__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--builder-card-padding);
+  border-radius: var(--radius-card-sm);
+  background: var(--color-deep);
+}
+
+.builder__stat b {
+  font-size: var(--fs-card-title);
+  line-height: 1.2;
+}
+
+.builder__stat span {
+  font-size: var(--fs-player-label);
+  opacity: 0.8;
+}
+
+/* избранное: свёрнуто, чтобы не мешать */
+.builder__favs {
+  border-radius: var(--radius-card-sm);
+  background: var(--color-deep);
+}
+
+.builder__favs-summary {
+  padding: var(--builder-card-padding);
+  font-size: var(--fs-card-title);
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+}
+
+.builder__favs-summary span {
+  opacity: 0.7;
+}
+
+.builder__favs-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--builder-gap-sm);
+  padding: 0 var(--builder-card-padding) var(--builder-card-padding);
+}
+
+.builder__favs-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--builder-gap-sm);
+}
+
+.builder__favs-add .builder__input {
+  flex: 0 1 260px;
+}
+
+.builder__favs-note,
+.builder__favs-empty,
+.builder__fav-meta {
+  font-size: var(--fs-player-label);
+  opacity: 0.8;
+}
+
+.builder__favs-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--builder-fav-width), 1fr));
+  gap: var(--builder-gap-sm);
+  padding: 0;
+  list-style: none;
+}
+
+.builder__fav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--builder-card-padding);
+  border-radius: var(--radius-card-sm);
+  background: var(--color-dark);
+}
+
+.builder__fav-preview {
+  padding: 6px;
+  border: none;
+  border-radius: 8px;
+  background: var(--color-hero-glass);
+  cursor: pointer;
+}
+
+.builder__fav-preview svg {
+  width: 100%;
+  max-height: var(--builder-fav-preview-height);
+}
+
+.builder__fav-name {
+  word-break: break-word;
+}
+
+.builder__fav-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.builder__small {
+  padding: 4px 12px;
+  border: var(--stroke-lift) solid var(--color-black);
+  border-radius: var(--radius-pill);
+  background: var(--color-text-inverse);
+  color: var(--color-black);
+  font: inherit;
+  font-size: var(--fs-player-label);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+}
+
+.builder__small--accent {
+  background: var(--color-button);
+}
+
+.builder__small:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .builder__round:not(:disabled):hover,
+  .builder__tool:hover,
+  .builder__small:not(:disabled):hover {
+    background: var(--color-accent);
+  }
+
+  .builder__round:not(:disabled):hover {
+    transform: translateY(var(--lift-hover-sm));
+    box-shadow: var(--shadow-lift-sm);
+  }
+
+  .builder__go:hover {
+    background: var(--color-accent);
+    transform: translateY(var(--lift-hover));
+    border-color: var(--color-black);
+    box-shadow: var(--shadow-lift);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .builder__go,
+  .builder__round {
+    transition: none;
+  }
+
+  .builder__go:hover,
+  .builder__go:focus-visible,
+  .builder__go[data-lifted],
+  .builder__round:hover,
+  .builder__round:focus-visible {
+    transform: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .builder {
+    --builder-panel-shadow-space: 8px;
+    --builder-cm-min: 4px;
+  }
+
+  /* на телефоне оба размера под стеной, стена листается вбок */
+  .builder__stage {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      'wall wall'
+      'height width';
+  }
+
+  /* в строку: «−» слева, «+» справа, как у длины */
+  .builder__size[data-vertical] {
+    flex-direction: row;
+    justify-self: center;
+  }
+
+  .builder__size[data-vertical] > :nth-child(2) {
+    order: 3;
+  }
+
+  .builder__size[data-vertical] > :nth-child(3) {
+    order: 2;
+  }
+
+  .builder__size[data-vertical] > :nth-child(4) {
+    order: 1;
+  }
+
+  .builder__size[data-vertical] > :nth-child(5) {
+    order: 4;
+  }
+
+  .builder__size--width {
+    justify-self: center;
+  }
+
+  .builder__go {
+    width: 100%;
+  }
+
+  .builder__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .builder__stage {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'wall'
+      'height'
+      'width';
+  }
+}
