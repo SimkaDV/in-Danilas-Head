@@ -11,6 +11,8 @@
   --builder-cm-min: 0px; /* на телефоне стена не уже стольких px на сантиметр и листается вбок */
   --builder-fav-width: 230px;
   --builder-open-time: 0.5s;
+  --builder-preview-height: clamp(140px, 16vw, 220px);
+  --builder-preview-drop: 24px; /* на сколько см уезжают рамки в превью при смене раскладки */
   --builder-bleed: 8px; /* запас под тени поднятых кнопок, пока тело обрезано */
   --builder-fav-preview-height: 120px;
 
@@ -20,11 +22,83 @@
   color: var(--color-text-inverse);
 }
 
+/* шапка в две колонки: слева текст и кнопка, справа превью раскладок */
 .builder__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--builder-gap);
+}
+
+.builder__intro {
   display: flex;
   flex-direction: column;
   gap: var(--builder-gap-sm);
-  max-width: 760px;
+}
+
+/* превью: та же рамка, что у стены, внутри меняются раскладки; это кнопка, поэтому ховер с подъёмом */
+.builder__preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--builder-gap-sm);
+  width: 100%;
+  padding: calc(var(--builder-gap-sm) + var(--builder-frame-ring));
+  border: var(--stroke-panel) solid var(--color-black);
+  border-radius: var(--radius-card-sm);
+  background: var(--color-deep);
+  box-shadow: inset 0 0 0 var(--builder-frame-ring) var(--color-dark);
+  cursor: pointer;
+  transition: transform var(--transition-lift), box-shadow var(--transition-lift);
+}
+
+.builder__preview:focus-visible {
+  transform: translateY(var(--lift-hover));
+  box-shadow: inset 0 0 0 var(--builder-frame-ring) var(--color-dark), var(--shadow-lift);
+  outline: none;
+}
+
+/* высота стены в превью одна, меняется только ширина */
+.builder__preview-wall {
+  width: 100%;
+  height: var(--builder-preview-height);
+}
+
+.builder__preview-frame {
+  transition:
+    transform var(--preview-swap) cubic-bezier(0.3, 0.7, 0.3, 1.1),
+    opacity var(--preview-swap) ease;
+  transition-delay: calc(var(--i) * var(--preview-step));
+}
+
+/* старая раскладка уезжает вниз и гаснет */
+.builder__preview-frames[data-phase='out'] .builder__preview-frame {
+  transform: translateY(var(--builder-preview-drop));
+  opacity: 0;
+}
+
+/* новая встаёт над стеной без анимации и со следующего кадра падает на место */
+.builder__preview-frames[data-phase='enter'] .builder__preview-frame {
+  transform: translateY(calc(-1 * var(--builder-preview-drop)));
+  opacity: 0;
+  transition: none;
+}
+
+.builder__preview-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.builder__preview-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-wall-dot);
+  transition: background var(--transition-lift);
+}
+
+.builder__preview-dots span[data-active] {
+  background: var(--color-accent);
 }
 
 .builder__title {
@@ -571,6 +645,11 @@
     box-shadow: var(--shadow-lift-sm);
   }
 
+  .builder__preview:hover {
+    transform: translateY(var(--lift-hover));
+    box-shadow: inset 0 0 0 var(--builder-frame-ring) var(--color-dark), var(--shadow-lift);
+  }
+
   .builder__go:hover,
   .builder__toggle:hover {
     background: var(--color-accent);
@@ -586,10 +665,14 @@
   .builder__toggle,
   .builder__toggle svg,
   .builder__body,
-  .builder__body-inner {
+  .builder__body-inner,
+  .builder__preview,
+  .builder__preview-frame {
     transition: none;
   }
 
+  .builder__preview:hover,
+  .builder__preview:focus-visible,
   .builder__toggle:hover,
   .builder__toggle:focus-visible,
   .builder__toggle[data-lifted],
@@ -603,6 +686,11 @@
 }
 
 @media (max-width: 720px) {
+  /* превью встаёт под текст */
+  .builder__head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .builder {
     --builder-cm-min: 4px;
   }

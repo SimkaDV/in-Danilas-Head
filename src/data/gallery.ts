@@ -1,4 +1,4 @@
-import type { Style } from '@/scripts/frames/layout';
+import type { Place, Style } from '@/scripts/frames/layout';
 
 // тексты страницы «Цифровая галерея» (/gallery/)
 export const galleryTitle = 'Цифровая галерея – В голове у Даньки';
@@ -36,11 +36,31 @@ export const builderStyles: { id: Style | 'any'; label: string }[] = [
   { id: 'grid', label: 'Сетка' },
 ];
 
+// раскладки Даньки для превью у конструктора: меняются по кругу, клик открывает конструктор с ней.
+// Пока временные из генератора, Данька соберёт свои в конструкторе. Высота стены у всех одна, длина может быть своя.
+export interface BuilderPreset {
+  name: string;
+  W: number;
+  H: number;
+  frames: Place[];
+}
+
+export const builderPresets: BuilderPreset[] = [
+  { name: 'Две полосы', W: 150, H: 60, frames: [{ o: 'v', i: 1, j: 1 }, { o: 'h', i: 1, j: 3 }, { o: 'h', i: 3, j: 1 }, { o: 'v', i: 3, j: 3 }, { o: 'v', i: 5, j: 1 }, { o: 'h', i: 5, j: 3 }, { o: 'h', i: 7, j: 1 }, { o: 'v', i: 7, j: 3 }, { o: 'v', i: 9, j: 1 }, { o: 'h', i: 9, j: 3 }] },
+  { name: 'Волна', W: 150, H: 60, frames: [{ o: 'h', i: 1, j: 1 }, { o: 'h', i: 1, j: 3 }, { o: 'v', i: 3, j: 2 }, { o: 'h', i: 5, j: 3 }, { o: 'h', i: 6, j: 1 }, { o: 'h', i: 7, j: 3 }, { o: 'h', i: 8, j: 1 }, { o: 'h', i: 9, j: 3 }, { o: 'h', i: 10, j: 1 }] },
+  { name: 'Симметрия', W: 150, H: 60, frames: [{ o: 'v', i: 5, j: 3 }, { o: 'v', i: 5, j: 0 }, { o: 'v', i: 7, j: 0 }, { o: 'v', i: 3, j: 0 }, { o: 'v', i: 3, j: 3 }, { o: 'v', i: 7, j: 3 }, { o: 'v', i: 1, j: 0 }, { o: 'v', i: 9, j: 0 }] },
+  { name: 'Салон', W: 150, H: 60, frames: [{ o: 'v', i: 4, j: 3 }, { o: 'v', i: 4, j: 0 }, { o: 'v', i: 6, j: 0 }, { o: 'h', i: 6, j: 2 }, { o: 'h', i: 2, j: 1 }, { o: 'h', i: 2, j: 3 }, { o: 'v', i: 8, j: 2 }] },
+  { name: 'Сетка', W: 150, H: 60, frames: [{ o: 'v', i: 0, j: 0 }, { o: 'v', i: 2, j: 0 }, { o: 'v', i: 4, j: 0 }, { o: 'v', i: 6, j: 0 }, { o: 'v', i: 8, j: 0 }, { o: 'v', i: 10, j: 0 }, { o: 'v', i: 0, j: 2 }, { o: 'v', i: 2, j: 2 }, { o: 'v', i: 4, j: 2 }, { o: 'v', i: 6, j: 2 }, { o: 'v', i: 8, j: 2 }, { o: 'v', i: 10, j: 2 }] },
+];
+
+export const builderPreviewInterval = 4500; // мс между раскладками в превью
+
 export const builderText = {
   title: 'Собери свою стену',
   lead: 'Задай размер свободного места на стене, выбери стиль и перемешивай, пока не понравится. Рамку можно перетащить по шайбам, повернуть или убрать.',
   open: 'Открыть конструктор',
   close: 'Свернуть конструктор',
+  previewLabel: (name: string) => `Открыть конструктор с раскладкой «${name}»`,
   wallLabel: 'Стена с рамками',
   height: 'высота',
   width: 'длина',

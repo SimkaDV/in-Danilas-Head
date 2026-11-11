@@ -1,5 +1,13 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
-import { builderStyles, builderText as t, builderWall, frameSystem } from '@/data/gallery';
+import {
+  builderPresets,
+  builderPreviewInterval,
+  builderStyles,
+  builderText as t,
+  builderWall,
+  frameSystem,
+  type BuilderPreset,
+} from '@/data/gallery';
 import { STYLES, Wall, seededRandom, type Orientation, type Place, type Style } from '@/scripts/frames/layout';
 import './CaseTabs.css';
 import './WallBuilder.css';
@@ -30,8 +38,9 @@ const COUNT_DELAY = 200;
 const COUNT_BUDGET = 250;
 // проверка стиля для бледной таблетки – меньше попыток, чем у настоящей раскладки
 const CHECK_TRIES = 8;
-// со стольких рамок от максимума «Любой» сначала пробует «Сетку»
+// «Любой» сначала пробует «Сетку», если рамок больше этой доли от максимума и максимум не меньше DENSE_MIN
 const DENSE = 0.75;
+const DENSE_MIN = 40;
 
 const makeWall = (W: number, H: number, random?: () => number) =>
   new Wall({ ...frameSystem, width: W, height: H }, random);
@@ -71,8 +80,10 @@ function layout(wall: Wall, n: number, choice: StyleChoice, last: Style | null) 
     return list ? { list, style: choice } : null;
   }
   const order: Style[] = STYLES.filter((s) => s !== 'grid' && s !== last).sort(() => Math.random() - 0.5);
-  // почти полную стену складывает только «Сетка», остальные долго ищут и не находят
-  if (n > wall.maxLayout().length * DENSE) order.unshift('grid');
+  // на большой почти полной стене остальные стили долго ищут и не находят, тогда сначала «Сетка»;
+  // на обычной стене «Сетка» только запасная, иначе «Любой» выдавал бы каждый раз одно и то же
+  const max = wall.maxLayout().length;
+  if (max >= DENSE_MIN && n > max * DENSE) order.unshift('grid');
   else order.push('grid');
   for (const s of order) {
     const list = wall.tryStyle(s, n);
@@ -336,18 +347,25 @@ export default function WallBuilder() {
     window.setTimeout(() => setFavNote(''), 2500);
   }
 
-  function applyFav(fav: Fav) {
-    const w = clamp(fav.W, builderWall.minWidth, builderWall.maxWidth);
-    const h = clamp(fav.H, builderWall.minHeight, builderWall.maxHeight);
+  // ставит готовую раскладку (из избранного или превью) на её стену
+  function applyLayout(layout: Saved & { name: string }) {
+    const w = clamp(layout.W, builderWall.minWidth, builderWall.maxWidth);
+    const h = clamp(layout.H, builderWall.minHeight, builderWall.maxHeight);
     const fw = makeWall(w, h);
     const list: Frame[] = [];
-    for (const f of fav.frames) if (fw.inArea(f) && !fw.collides(f, list)) list.push({ ...f, id: list.length + 1 });
+    for (const f of layout.frames) if (fw.inArea(f) && !fw.collides(f, list)) list.push({ ...f, id: list.length + 1 });
     added.current = [];
     setW(w);
     setH(h);
     setFrames(list);
     setSel(null);
-    setNote({ text: t.favApplied(fav.name) });
+    setNote({ text: t.favApplied(layout.name) });
+  }
+
+  // клик по превью: раскладка Даньки сразу в конструкторе, свёрнутый раскрывается
+  function applyPreset(preset: BuilderPreset) {
+    applyLayout(preset);
+    if (!open) toggleOpen();
   }
 
   function renameFav(fav: Fav, name: string) {
@@ -397,21 +415,24 @@ export default function WallBuilder() {
   return (
     <div className="builder">
       <div className="builder__head">
-        <h2 className="builder__title">{t.title}</h2>
-        <p className="builder__lead">{t.lead}</p>
-        <button
-          type="button"
-          className="builder__toggle"
-          data-scroll-lift
-          aria-expanded={open}
-          aria-controls="builder-body"
-          onClick={toggleOpen}
-        >
-          {open ? t.close : t.open}
-          <svg viewBox="0 0 16 10" aria-hidden="true">
-            <path d="M2 2l6 6 6-6" />
-          </svg>
-        </button>
+        <div className="builder__intro">
+          <h2 className="builder__title">{t.title}</h2>
+          <p className="builder__lead">{t.lead}</p>
+          <button
+            type="button"
+            className="builder__toggle"
+            data-scroll-lift
+            aria-expanded={open}
+            aria-controls="builder-body"
+            onClick={toggleOpen}
+          >
+            {open ? t.close : t.open}
+            <svg viewBox="0 0 16 10" aria-hidden="true">
+              <path d="M2 2l6 6 6-6" />
+            </svg>
+          </button>
+        </div>
+        <Preview onPick={applyPreset} />
       </div>
 
       {/* свёрнут, пока не нажали: высота 0fr → 1fr, после раскрытия обрезка снимается, чтобы были видны тени */}
@@ -569,7 +590,7 @@ export default function WallBuilder() {
                 <ul className="builder__favs-list">
                   {favs.map((fav) => (
                     <li key={fav.id} className="builder__fav">
-                      <button type="button" className="builder__fav-preview" aria-label={`${t.favApply}: ${fav.name}`} onClick={() => applyFav(fav)}>
+                      <button type="button" className="builder__fav-preview" aria-label={`${t.favApply}: ${fav.name}`} onClick={() => applyLayout(fav)}>
                         <Mini fav={fav} />
                       </button>
                       {renaming === fav.id ? (
@@ -589,7 +610,7 @@ export default function WallBuilder() {
                       )}
                       <span className="builder__fav-meta">{t.favMeta(fav.frames.length, fav.W, fav.H)}</span>
                       <div className="builder__fav-actions">
-                        <button type="button" className="builder__small builder__small--accent" onClick={() => applyFav(fav)}>
+                        <button type="button" className="builder__small builder__small--accent" onClick={() => applyLayout(fav)}>
                           {t.favApply}
                         </button>
                         <button type="button" className="builder__small" onClick={() => setRenaming(fav.id)}>
@@ -759,6 +780,93 @@ function FrameTools(props: {
         </svg>
       </button>
     </div>
+  );
+}
+
+// превью у заголовка: раскладки Даньки по кругу, старая уезжает вниз, новая падает сверху
+type Phase = 'shown' | 'out' | 'enter';
+const PREVIEW_SWAP = 450; // мс на уход или появление одной рамки
+const PREVIEW_STEP = 25; // рамки уходят по очереди с таким шагом
+
+function Preview({ onPick }: { onPick: (preset: BuilderPreset) => void }) {
+  const [index, setIndex] = useState(0);
+  const [phase, setPhase] = useState<Phase>('shown');
+  const preset = builderPresets[index];
+  const wall = useMemo(() => makeWall(preset.W, preset.H), [preset]);
+
+  useEffect(() => {
+    if (builderPresets.length < 2) return;
+    const timer = window.setInterval(() => setPhase('out'), builderPreviewInterval);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (phase === 'out') {
+      // ждём, пока уедет последняя рамка, и подменяем раскладку
+      const timer = window.setTimeout(() => {
+        setIndex((i) => (i + 1) % builderPresets.length);
+        setPhase('enter');
+      }, PREVIEW_SWAP + preset.frames.length * PREVIEW_STEP);
+      return () => clearTimeout(timer);
+    }
+    if (phase === 'enter') {
+      // новые рамки сначала встают над стеной без анимации, со следующего кадра падают на место
+      let second = 0;
+      const first = requestAnimationFrame(() => (second = requestAnimationFrame(() => setPhase('shown'))));
+      return () => {
+        cancelAnimationFrame(first);
+        cancelAnimationFrame(second);
+      };
+    }
+  }, [phase, preset]);
+
+  const dots = [];
+  for (let i = 0; i < wall.nx; i++) {
+    for (let j = 0; j < wall.ny; j++) {
+      const [x, y] = wall.dot(i, j);
+      dots.push(<circle key={`${i},${j}`} cx={x} cy={y} r={0.9} className="builder__dot" />);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      className="builder__preview"
+      aria-label={t.previewLabel(preset.name)}
+      onClick={() => onPick(preset)}
+      style={{ '--preview-swap': `${PREVIEW_SWAP}ms`, '--preview-step': `${PREVIEW_STEP}ms` } as CSSProperties}
+    >
+      <svg className="builder__preview-wall" viewBox={`${-PAD} ${-PAD} ${preset.W + PAD * 2} ${preset.H + PAD * 2}`} aria-hidden="true">
+        <rect x={0} y={0} width={preset.W} height={preset.H} rx={1} className="builder__area" />
+        <g>{dots}</g>
+        <g className="builder__preview-frames" data-phase={phase}>
+          {preset.frames.map((f, n) => {
+            const r = wall.rect(f);
+            return (
+              <g key={`${index}-${n}`} className="builder__preview-frame" style={{ '--i': n } as CSSProperties}>
+                <rect x={r.x} y={r.y} width={r.w} height={r.h} rx={0.5} className="builder__frame-body" />
+                <rect
+                  x={r.x + 1.2}
+                  y={r.y + 1.2}
+                  width={r.w - 2.4}
+                  height={r.h - 2.4}
+                  className={`builder__frame-photo builder__frame-photo--${f.o}`}
+                />
+                {wall.magnets(f).map(([i, j]) => {
+                  const [x, y] = wall.dot(i, j);
+                  return <circle key={`${i},${j}`} cx={x} cy={y} r={0.75} className="builder__magnet" />;
+                })}
+              </g>
+            );
+          })}
+        </g>
+      </svg>
+      <span className="builder__preview-dots" aria-hidden="true">
+        {builderPresets.map((p, i) => (
+          <span key={p.name + i} data-active={i === index ? '' : undefined} />
+        ))}
+      </span>
+    </button>
   );
 }
 
