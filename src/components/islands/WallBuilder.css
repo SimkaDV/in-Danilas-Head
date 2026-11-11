@@ -537,14 +537,67 @@
 }
 
 .builder__favs-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
   padding: var(--builder-card-padding);
+  border: none;
+  background: none;
+  color: inherit;
+  font-family: var(--font-main);
   font-size: var(--fs-card-title);
   font-weight: var(--fw-bold);
+  text-align: left;
   cursor: pointer;
 }
 
 .builder__favs-summary span {
   opacity: 0.7;
+}
+
+.builder__favs-summary svg {
+  width: 0.6em;
+  margin-left: auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform var(--builder-open-time) ease;
+}
+
+.builder__favs[data-open] .builder__favs-summary svg {
+  transform: rotate(180deg);
+}
+
+.builder__favs-summary:focus-visible {
+  outline: var(--stroke-lift) solid var(--color-accent);
+  outline-offset: -4px;
+  border-radius: var(--radius-card-sm);
+}
+
+/* раскрытие по высоте: 0fr → 1fr, свёрнутое прячется, когда доедет */
+.builder__favs-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--builder-open-time) ease;
+}
+
+.builder__favs[data-open] .builder__favs-wrap {
+  grid-template-rows: 1fr;
+}
+
+.builder__favs-clip {
+  min-height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  transition: visibility 0s linear var(--builder-open-time);
+}
+
+.builder__favs[data-open] .builder__favs-clip {
+  visibility: visible;
+  transition-delay: 0s;
 }
 
 .builder__favs-body {
@@ -667,7 +720,10 @@
   .builder__body,
   .builder__body-inner,
   .builder__preview,
-  .builder__preview-frame {
+  .builder__preview-frame,
+  .builder__favs-summary svg,
+  .builder__favs-wrap,
+  .builder__favs-clip {
     transition: none;
   }
 

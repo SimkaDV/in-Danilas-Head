@@ -118,6 +118,7 @@ export default function WallBuilder() {
   const [favNote, setFavNote] = useState('');
   const [renaming, setRenaming] = useState<string | null>(null);
   const [armed, setArmed] = useState<string | null>(null);
+  const [favsOpen, setFavsOpen] = useState(false);
   const [open, setOpen] = useState(false);
   // раскрытие доехало до конца: можно не обрезать содержимое
   const [settled, setSettled] = useState(false);
@@ -567,67 +568,81 @@ export default function WallBuilder() {
             ))}
           </ul>
 
-          <details className="builder__favs">
-            <summary className="builder__favs-summary">
+          {/* свёрнуто, чтобы не мешать; раскрывается плавно, как и сам конструктор */}
+          <div className="builder__favs" data-open={favsOpen ? '' : undefined}>
+            <button
+              type="button"
+              className="builder__favs-summary"
+              aria-expanded={favsOpen}
+              aria-controls="builder-favs"
+              onClick={() => setFavsOpen(!favsOpen)}
+            >
               {t.favTitle} <span>({favs.length})</span>
-            </summary>
-            <div className="builder__favs-body">
-              <div className="builder__favs-add">
-                <input
-                  className="builder__input"
-                  value={favName}
-                  placeholder={t.favName}
-                  maxLength={60}
-                  onChange={(e) => setFavName(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && addFav()}
-                />
-                <button type="button" className="builder__small builder__small--accent" disabled={!n} onClick={addFav}>
-                  ★ {t.favSave}
-                </button>
-                <span className="builder__favs-note">{favNote || t.favNote}</span>
+              <svg viewBox="0 0 16 10" aria-hidden="true">
+                <path d="M2 2l6 6 6-6" />
+              </svg>
+            </button>
+            <div id="builder-favs" className="builder__favs-wrap" inert={!favsOpen}>
+              <div className="builder__favs-clip">
+                <div className="builder__favs-body">
+                  <div className="builder__favs-add">
+                    <input
+                      className="builder__input"
+                      value={favName}
+                      placeholder={t.favName}
+                      maxLength={60}
+                      onChange={(e) => setFavName(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && addFav()}
+                    />
+                    <button type="button" className="builder__small builder__small--accent" disabled={!n} onClick={addFav}>
+                      ★ {t.favSave}
+                    </button>
+                    <span className="builder__favs-note">{favNote || t.favNote}</span>
+                  </div>
+                  {favs.length ? (
+                    <ul className="builder__favs-list">
+                      {favs.map((fav) => (
+                        <li key={fav.id} className="builder__fav">
+                          <button type="button" className="builder__fav-preview" aria-label={`${t.favApply}: ${fav.name}`} onClick={() => applyLayout(fav)}>
+                            <Mini fav={fav} />
+                          </button>
+                          {renaming === fav.id ? (
+                            <input
+                              className="builder__input"
+                              defaultValue={fav.name}
+                              maxLength={60}
+                              autoFocus
+                              onBlur={(e) => renameFav(fav, e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') renameFav(fav, e.currentTarget.value);
+                                if (e.key === 'Escape') setRenaming(null);
+                              }}
+                            />
+                          ) : (
+                            <b className="builder__fav-name">{fav.name}</b>
+                          )}
+                          <span className="builder__fav-meta">{t.favMeta(fav.frames.length, fav.W, fav.H)}</span>
+                          <div className="builder__fav-actions">
+                            <button type="button" className="builder__small builder__small--accent" onClick={() => applyLayout(fav)}>
+                              {t.favApply}
+                            </button>
+                            <button type="button" className="builder__small" onClick={() => setRenaming(fav.id)}>
+                              {t.favRename}
+                            </button>
+                            <button type="button" className="builder__small" onClick={() => deleteFav(fav)}>
+                              {armed === fav.id ? t.favDeleteConfirm : t.favDelete}
+                            </button>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="builder__favs-empty">{t.favEmpty}</p>
+                  )}
+                </div>
               </div>
-              {favs.length ? (
-                <ul className="builder__favs-list">
-                  {favs.map((fav) => (
-                    <li key={fav.id} className="builder__fav">
-                      <button type="button" className="builder__fav-preview" aria-label={`${t.favApply}: ${fav.name}`} onClick={() => applyLayout(fav)}>
-                        <Mini fav={fav} />
-                      </button>
-                      {renaming === fav.id ? (
-                        <input
-                          className="builder__input"
-                          defaultValue={fav.name}
-                          maxLength={60}
-                          autoFocus
-                          onBlur={(e) => renameFav(fav, e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') renameFav(fav, e.currentTarget.value);
-                            if (e.key === 'Escape') setRenaming(null);
-                          }}
-                        />
-                      ) : (
-                        <b className="builder__fav-name">{fav.name}</b>
-                      )}
-                      <span className="builder__fav-meta">{t.favMeta(fav.frames.length, fav.W, fav.H)}</span>
-                      <div className="builder__fav-actions">
-                        <button type="button" className="builder__small builder__small--accent" onClick={() => applyLayout(fav)}>
-                          {t.favApply}
-                        </button>
-                        <button type="button" className="builder__small" onClick={() => setRenaming(fav.id)}>
-                          {t.favRename}
-                        </button>
-                        <button type="button" className="builder__small" onClick={() => deleteFav(fav)}>
-                          {armed === fav.id ? t.favDeleteConfirm : t.favDelete}
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="builder__favs-empty">{t.favEmpty}</p>
-              )}
             </div>
-          </details>
+          </div>
         </div>
       </div>
     </div>
