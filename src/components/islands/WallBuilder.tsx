@@ -8,6 +8,7 @@ import {
   frameSystem,
   type BuilderPreset,
 } from '@/data/gallery';
+import { telegramLink } from '@/data/contacts';
 import { STYLES, Wall, seededRandom, type Orientation, type Place, type Style } from '@/scripts/frames/layout';
 import './CaseTabs.css';
 import './WallBuilder.css';
@@ -173,6 +174,26 @@ export default function WallBuilder() {
     }, COUNT_DELAY);
     return () => clearTimeout(timer);
   }, [wall, n, max]);
+
+  // остров оживает, только когда доедет до экрана: если пришли по #builder (кнопка в шапке), раскрываемся сразу
+  useEffect(() => {
+    if (location.hash === '#builder') toggleOpen();
+  }, []);
+
+  // кнопки с data-builder-open (в шапке страницы) ведут к конструктору и раскрывают его
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (!(e.target as Element).closest('[data-builder-open]')) return;
+      // едем сами, а не по якорю: так прокрутка не теряется, пока конструктор раскрывается
+      e.preventDefault();
+      const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+      document.getElementById('builder')?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+      history.replaceState(null, '', '#builder');
+      if (!open) toggleOpen();
+    };
+    document.addEventListener('click', onClick);
+    return () => document.removeEventListener('click', onClick);
+  });
 
   // --- действия ---
 
@@ -392,6 +413,18 @@ export default function WallBuilder() {
   const selFrame = frames.find((f) => f.id === sel) ?? null;
   const box = n ? wall.bbox(frames) : null;
   const pv = wall.places.filter((p) => p.o === 'v').length;
+  const vertical = frames.filter((f) => f.o === 'v').length;
+  const orderHref = telegramLink(
+    t.orderMessage({
+      frames: n,
+      vertical,
+      horizontal: n - vertical,
+      frame: `${frameSystem.frameWidth}×${frameSystem.frameHeight}`,
+      wall: `${W}×${H}`,
+      size: box ? `${fmt(box.x2 - box.x)}×${fmt(box.y2 - box.y)}` : '',
+      style: lastStyle.current ? styleLabel(lastStyle.current) : '',
+    }),
+  );
   const shownNote: Note = note ?? (max && n >= max ? { text: t.atMax(W, H, max) } : null);
 
   const dots = [];
@@ -414,7 +447,7 @@ export default function WallBuilder() {
   ];
 
   return (
-    <div className="builder">
+    <div className="builder" id="builder">
       <div className="builder__head">
         <div className="builder__intro">
           <h2 className="builder__title">{t.title}</h2>
@@ -550,6 +583,14 @@ export default function WallBuilder() {
             <button type="button" className="builder__go" data-scroll-lift onClick={() => randomize()}>
               {t.randomize}
             </button>
+
+            {/* заказ: личка в Telegram с параметрами текущей раскладки, фото человек пришлёт сам */}
+            <a className="builder__go builder__order" href={orderHref} target="_blank" rel="noopener" data-scroll-lift>
+              {t.order}
+              <svg viewBox="0 0 10 16" aria-hidden="true">
+                <path d="M2 2l6 6-6 6" />
+              </svg>
+            </a>
           </div>
 
           <p className="builder__note" data-warn={shownNote?.warn ? '' : undefined} aria-live="polite" hidden={!shownNote}>

@@ -1,0 +1,253 @@
+---
+import { Image } from 'astro:assets';
+import Button from '@/components/ui/Button.astro';
+import FeatureCard from '@/components/ui/FeatureCard.astro';
+import { galleryHero, galleryHeroFeatures, galleryHeroPhotos } from '@/data/galleryHero';
+
+const { title, frameLabel, interval, build, order } = galleryHero;
+---
+<!-- заголовок отдельно; ниже две колонки: слева фишки столбцом и кнопки под ними, справа обложка с рамкой высотой с фишки -->
+<section class="gallery-hero">
+  <h1 class="gallery-hero__title">{title}</h1>
+
+  <div class="gallery-hero__layout">
+    <div class="gallery-hero__features">
+      {galleryHeroFeatures.map((feature) => (
+        <FeatureCard title={feature.title} text={feature.text} shape={feature.shape} icon={feature.icon} />
+      ))}
+    </div>
+
+    <div class="gallery-hero__cover">
+      <figure class="gallery-hero__stage" data-hero-frame data-interval={interval}>
+        <!-- рамка нарисована по рендеру из Fusion: серая, скруглённая, с толщиной; потом заменится рендером -->
+        <div class="gallery-hero__frame" role="img" aria-label={frameLabel}>
+          <div class="gallery-hero__window">
+            {galleryHeroPhotos.map((photo, index) => (
+              <Image
+                class="gallery-hero__photo"
+                src={photo.src}
+                alt={photo.alt}
+                widths={[340, 680]}
+                sizes="340px"
+                loading={index === 0 ? 'eager' : 'lazy'}
+                data-hero-photo
+                data-active={index === 0 ? '' : undefined}
+              />
+            ))}
+          </div>
+        </div>
+        {galleryHeroPhotos.map((photo, index) =>
+          photo.collection ? (
+            <figcaption class="gallery-hero__caption" data-hero-caption hidden={index !== 0}>
+              <a href={photo.collection.href}>{photo.collection.name} →</a>
+            </figcaption>
+          ) : null,
+        )}
+      </figure>
+    </div>
+
+    <div class="gallery-hero__actions">
+      <!-- data-builder-open: конструктор ниже сам прокручивается к себе и раскрывается (WallBuilder) -->
+      <Button href="#builder" data-builder-open>{build}</Button>
+      <Button href={order.href} target="_blank" rel="noopener" arrow>{order.label}</Button>
+    </div>
+  </div>
+</section>
+
+<script>
+  // фото в рамке по очереди: активное проявляется, прошлое гаснет; подпись коллекции меняется вместе с ним
+  document.querySelectorAll<HTMLElement>('[data-hero-frame]').forEach((stage) => {
+    const photos = [...stage.querySelectorAll<HTMLElement>('[data-hero-photo]')];
+    const captions = [...stage.querySelectorAll<HTMLElement>('[data-hero-caption]')];
+    if (photos.length < 2) return;
+    let current = 0;
+    window.setInterval(() => {
+      photos[current].removeAttribute('data-active');
+      if (captions[current]) captions[current].hidden = true;
+      current = (current + 1) % photos.length;
+      photos[current].setAttribute('data-active', '');
+      if (captions[current]) captions[current].hidden = false;
+    }, Number(stage.dataset.interval) || 4000);
+  });
+</script>
+
+<style>
+  .gallery-hero {
+    --gallery-hero-gap: clamp(16px, 2.4vw, 28px);
+    --gallery-hero-features-gap: clamp(12px, 1.6vw, 20px);
+    --gallery-hero-cover-padding: clamp(20px, 3vw, 40px);
+    --gallery-hero-shadow-space: 13px; /* слева и сверху больше: там тень внутрь */
+    --gallery-hero-frame-width: clamp(160px, 19vw, 250px); /* такая, чтобы обложка не стала выше фишек */
+    --gallery-hero-frame-border: 14%; /* поле рамки вокруг окна, от ширины */
+    --gallery-hero-frame-radius: 9%;
+    --gallery-hero-window-radius: 7%;
+    --gallery-hero-tilt: perspective(900px) rotateX(10deg) rotateY(-20deg) rotateZ(3deg);
+    --gallery-hero-fade: 0.9s;
+    --gallery-hero-glass-blur: 1px;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--gallery-hero-gap);
+    color: var(--color-text-inverse);
+  }
+
+  .gallery-hero__title {
+    font-size: var(--fs-h1);
+    font-weight: var(--fw-black);
+    line-height: var(--lh-h1);
+    text-shadow: var(--shadow-title);
+  }
+
+  /* обложка как панель Hero главной: стекло, чёрная обводка и тень внутрь; внутри только рамка */
+  .gallery-hero__cover {
+    display: grid;
+    place-items: center;
+    padding: calc(var(--gallery-hero-cover-padding) + var(--gallery-hero-shadow-space)) var(--gallery-hero-cover-padding)
+      var(--gallery-hero-cover-padding) calc(var(--gallery-hero-cover-padding) + var(--gallery-hero-shadow-space));
+    border: var(--stroke-panel) solid var(--color-black);
+    border-radius: var(--radius-panel);
+    background: var(--color-hero-glass);
+    backdrop-filter: blur(var(--gallery-hero-glass-blur));
+    box-shadow: var(--shadow-panel-inset);
+  }
+
+  .gallery-hero__stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gallery-hero-features-gap);
+  }
+
+  /* рамка 15×21 с толщиной: слои тени дают торец, весь блок чуть повёрнут в 3D */
+  .gallery-hero__frame {
+    width: var(--gallery-hero-frame-width);
+    aspect-ratio: 15 / 21;
+    padding: var(--gallery-hero-frame-border);
+    border-radius: var(--gallery-hero-frame-radius);
+    background: var(--color-frame-render);
+    box-shadow:
+      inset 0 0 0 1px var(--color-frame-render-edge),
+      1px 1px 0 var(--color-frame-render-side),
+      2px 2px 0 var(--color-frame-render-side),
+      3px 3px 0 var(--color-frame-render-side),
+      4px 4px 0 var(--color-frame-render-side),
+      5px 5px 0 var(--color-frame-render-edge),
+      14px 18px 24px var(--color-frame-render-cast);
+    transform: var(--gallery-hero-tilt);
+  }
+
+  .gallery-hero__window {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: var(--gallery-hero-window-radius);
+    background: var(--color-dark);
+    box-shadow: inset 2px 2px 0 var(--color-frame-render-edge);
+  }
+
+  .gallery-hero__photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity var(--gallery-hero-fade) ease;
+  }
+
+  .gallery-hero__photo[data-active] {
+    opacity: 1;
+  }
+
+  .gallery-hero__caption a {
+    color: var(--color-accent);
+    font-weight: var(--fw-semibold);
+    text-decoration: none;
+  }
+
+  /* обложка тянется на высоту фишек (сама она ниже), кнопки внизу слева, под фишками */
+  .gallery-hero__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    grid-template-areas:
+      'features cover'
+      'actions .';
+    align-items: stretch;
+    gap: var(--gallery-hero-features-gap);
+  }
+
+  .gallery-hero__features {
+    grid-area: features;
+  }
+
+  .gallery-hero__cover {
+    grid-area: cover;
+  }
+
+  .gallery-hero__actions {
+    grid-area: actions;
+  }
+
+  .gallery-hero__features {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gallery-hero-features-gap);
+  }
+
+  /* в столбце карточкам тесно по высоте: иконка сбоку от текста, как у них на телефоне */
+  .gallery-hero__features :global(.feature-card) {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .gallery-hero__features :global(.feature-card__art) {
+    align-self: auto;
+  }
+
+  .gallery-hero__features :global(.feature-card__body) {
+    flex: 1;
+  }
+
+  .gallery-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gallery-hero-features-gap);
+  }
+
+  /* две кнопки делят ширину колонки поровну */
+  .gallery-hero__actions :global(.button) {
+    flex: 1 1 0;
+    width: auto;
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gallery-hero__photo {
+      transition: none;
+    }
+  }
+
+  /* планшет и телефон: обложка сверху, под ней фишки и кнопки */
+  @media (max-width: 900px) {
+    .gallery-hero__layout {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        'cover'
+        'features'
+        'actions';
+    }
+  }
+
+  @media (max-width: 720px) {
+    .gallery-hero {
+      --gallery-hero-shadow-space: 8px;
+      --gallery-hero-frame-width: min(55vw, 220px);
+    }
+
+
+    .gallery-hero__actions :global(.button) {
+      width: 100%;
+    }
+  }
+</style>

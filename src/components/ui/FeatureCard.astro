@@ -3,7 +3,7 @@ interface Props {
   title: string;
   text: string;
   shape?: 'a' | 'b' | 'c';
-  icon?: 'magnet' | 'modules' | 'palette';
+  icon?: 'magnet' | 'modules' | 'palette' | 'camera' | 'frame';
 }
 
 const { title, text, shape = 'a', icon } = Astro.props;
@@ -33,6 +33,18 @@ const { title, text, shape = 'a', icon } = Astro.props;
             <circle cx="17.5" cy="10.5" r="1" fill="currentColor" />
             <circle cx="8.5" cy="7.5" r="1" fill="currentColor" />
             <circle cx="6.5" cy="12.5" r="1" fill="currentColor" />
+          </>
+        )}
+        {icon === 'camera' && (
+          <>
+            <path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <circle cx="12" cy="13" r="3.5" />
+          </>
+        )}
+        {icon === 'frame' && (
+          <>
+            <rect x="5" y="2" width="14" height="20" rx="2.5" />
+            <rect x="8" y="5" width="8" height="14" rx="1.5" />
           </>
         )}
       </svg>

@@ -75,6 +75,26 @@ export const builderText = {
   removeFrame: 'Убрать рамку',
   stylesLabel: 'Стиль раскладки',
   randomize: 'Случайная раскладка',
+  order: 'Заказать рамки',
+  orderMessage: (o: {
+    frames: number;
+    vertical: number;
+    horizontal: number;
+    frame: string;
+    wall: string;
+    size: string;
+    style: string;
+  }) =>
+    [
+      'Привет, хочу заказать рамки для галереи',
+      `Рамок: ${o.frames} (верт. ${o.vertical}, гор. ${o.horizontal}), рамка ${o.frame} см`,
+      `Стена: ${o.wall} см`,
+      o.size && `Размер композиции: ${o.size} см`,
+      o.style && `Стиль: ${o.style}`,
+      'Фото пришлю сюда',
+    ]
+      .filter(Boolean)
+      .join('\n'),
   rotate: 'Повернуть',
   remove: 'Убрать',
   // подсказки под панелью
